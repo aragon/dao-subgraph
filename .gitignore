@@ -2,7 +2,7 @@
 /node_modules
 
 # Compilation output
-/build/
+build/
 
 # Code coverage artifacts
 /coverage
