@@ -23,7 +23,7 @@ To test the subgraph locally please do the following tasks
 First make sure you have both Ganache and Graph CLIs, and install project dependencies:
 
 ```bash
-  npm install -g aragon-cli
+  npm install -g @aragon/cli
   npm install -g @graphprotocol/graph-cli
   npm i
 ```
