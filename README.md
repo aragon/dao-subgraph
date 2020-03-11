@@ -10,22 +10,20 @@ These subgraphs has three types of files which tell the Graph Node to ingest eve
 
 - The subgraph manifest (subgraph.yaml)
 - A GraphQL schema (schema.graphql)
-- Mapping scripts (**Individual** - ACL.ts, constants.ts, EVMScriptRegistry.ts, Finance.ts, Kernel.ts, TokenManager.ts, Vault.ts, Voting.ts | **Network** - DAOFactory.ts, ENSResolverFIFS.ts)
+- Mapping scripts (ACL.ts, constants.ts, Kernel.ts, DAOFactory.ts)
 
-This repository has these files created and ready to compile, so a user can start this subgraph on their own. The only thing that needs to be edited is the contract addresses in the `subgraph.yaml` file to change between Rinkeby or Mainnet. If you are indexing a different Individual-DAO-Subgraph, you will have to grab the contract addresses that are relevant to that subgraph.
+This repository has these files created and ready to compile, so a user can start this subgraph on their own. The only thing that needs to be edited is the contract addresses in the `subgraph.yaml` file to change between Rinkeby or Mainnet `DAOFactory`.
 
-We have provided a quick guide on how to start up the Aragon-Subgraph graph node in the next section. If these steps aren't descriptive enough, the [getting started guide](https://github.com/graphprotocol/graph-node/blob/master/docs/getting-started.md) has in depth details on running a subgraph.
-
-### Local
+### Local setup
 
 To test the subgraph locally please do the following tasks
 
-##### 1. Install Ganache and The Graph and local dependencies
+##### 1. Install aragonCLI and The Graph and local dependencies
 
 First make sure you have both Ganache and Graph CLIs, and install project dependencies:
 
 ```bash
-  npm install -g ganache-cli
+  npm install -g aragon-cli
   npm install -g @graphprotocol/graph-cli
   npm i
 ```
@@ -35,7 +33,7 @@ First make sure you have both Ganache and Graph CLIs, and install project depend
 Start a local aragen in a separate terminal with the following params:
 
 ```bash
-  aragon devchain
+  aragon devchain --verbose
 ```
 
 ##### 3. Start Graph node
@@ -67,9 +65,7 @@ Below shows all the ways to query a Individual Subgraph and the network subgraph
 
 The query below shows all the information that is possible to query, but is limited to the first 5 instances. Limiting to 5 or 10 instances is good, because with no limit tens of thousands of results can be queried at once, which can be slow on your computer. There are many other filtering options that can be used, just check out the [querying api](https://github.com/graphprotocol/graph-node/blob/master/docs/graphql-api.md). Also check out the [GraphQL docs](https://graphql.org/learn/) if you are completely new to GraphQL and the info in this section doesn't make sense.
 
-The query is set up so that all the internal entities are queried from within the top level entities. The top level entities are the `apps`, which are Kernel, ACL, EVMScriptRegistry, Vault, TokenManager, Finances and Voting.
-
-#### Queries examples
+#### Query example
 
 ```graphql
 {
