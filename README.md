@@ -30,12 +30,12 @@ First make sure you have both Ganache and Graph CLIs, and install project depend
   npm i
 ```
 
-##### 2. Start Ganache node
+##### 2. Start aragen node
 
-Start a local ganache in a separate terminal with the following params:
+Start a local aragen in a separate terminal with the following params:
 
 ```bash
-  ganache-cli -h 0.0.0.0 -i 15 --gasLimit 8000000 --deterministic
+  aragon devchain
 ```
 
 ##### 3. Start Graph node
@@ -69,173 +69,21 @@ The query below shows all the information that is possible to query, but is limi
 
 The query is set up so that all the internal entities are queried from within the top level entities. The top level entities are the `apps`, which are Kernel, ACL, EVMScriptRegistry, Vault, TokenManager, Finances and Voting.
 
-#### Individual Subgraph Queries
+#### Queries examples
 
 ```graphql
 {
-  kernels {
+  kernels(first: 5) {
     id
-    appID
-    permissions {
-      entities
-      role
-    }
-    managers {
-      managesManageApps
-    }
-  }
-  acls {
-    id
-    baseAddress
-    appID
-    upgradeable
-    defaultApp
-    permissions {
-      entities
-      role
-    }
-    managers {
-      managesCreatePermissions
-    }
-  }
-  evmscriptRegistries {
-    id
-    baseAddress
-    appID
-    upgradeable
-    defaultApp
-    permissions {
-      entities
-      role
-    }
-    managers {
-      managesAddExecutor
-      managesEnableAndDisableExecutors
-    }
-    executors
-  }
-  vaults {
-    id
-    baseAddress
-    appID
-    upgradeable
-    defaultApp
-    permissions {
-      entities
-      role
-    }
-    managers {
-      managesTransfers
-    }
-    transfers {
-      amount
-      tokenAddress
-      to
-    }
-    deposits {
-      amount
-      tokenAddress
-      sender
-    }
-  }
-  tokenManagers {
-    id
-    baseAddress
-    appID
-    upgradeable
-    defaultApp
-    permissions {
-      entities
-      role
-    }
-    managers {
-      managesBurn
-      managesMint
-      managesIssue
-      managesAssign
-      managesRevokeVestings
-    }
-  }
-  finances {
-    id
-    baseAddress
-    appID
-    upgradeable
-    defaultApp
-    permissions {
-      entities
-      role
-    }
-    periods {
+    acl {
       id
-      starts
-      ends
     }
-    transactions {
+    appsProxies {
       id
-      incoming
-      amount
-      entity
-      reference
+      appID
     }
-    managers {
-      managesChangeBudget
-      managesChangePeriod
-      managesCreatePayments
-      managesManagePayments
-      managesExecutePayments
-    }
-  }
-  votings {
-    id
-    baseAddress
-    appID
-    upgradeable
-    defaultApp
-    permissions {
-      entities
-      role
-    }
-    managers {
-      managesCreateVotes
-      managesModifyQuorum
-      managesModifySupport
-    }
-    supportRequiredPercent
-    minQuorumPercent
-  }
-  votes(first: 5) {
-    id
-    appAddress
-    creator
-    metadata
-    supporters
-    supportersStake
-    nonSupporters
-    nonSupportersStake
-    executed
   }
 }
 ```
 
 The command above can be copy pasted into the Graphiql interface in your browser at `127.0.0.1:8000`.
-
-#### Network Subgraph Queries
-
-This subgraph is a lot simpler, as most of the good data is within DAOs. The Kits could still be tracked here, but they don't directly show information in the Dapp, so they were left out. The following can be queried:
-
-```graphql
-{
-  daos(first: 10) {
-    id
-  }
-  evmscriptRegistries(first: 10) {
-    id
-  }
-  ensresolvers(orderBy: id, first: 10) {
-    id
-    owner
-    resolver
-  }
-}
-```
