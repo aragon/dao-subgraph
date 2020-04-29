@@ -11,7 +11,7 @@ type Repo @entity {
   node: Bytes!                        # Repo ENS node
   lastVersion: Version                # Latests version
   versions: [Version!] @derivedFrom(field: "repo")
-  apps: [App!] @derivedFrom(field: "repo")
+  # apps: [App!] @derivedFrom(field: "repo")
 }
 
 type Version @entity {
@@ -59,10 +59,10 @@ type App @entity {
   appId: String!                      # ENS namehash of the aragonPM repo
   isForwarder: Boolean!               # Whether the app is Forwarder
   isUpgradeable: Boolean!             # Whether the app is upgradeable
-  implementation: Bytes!              # Address of the app instance or base
-  repo: Repo!                         # Repo entity
-  artifact: String!                   # Artifact.json metadata
-  manifest: String!                   # Manifest.json metadata
+  implementation: Bytes               # Address of the app instance or base
+  # repo: Repo!                         # Repo entity
+  # artifact: String!                   # Artifact.json metadata
+  # manifest: String!                   # Manifest.json metadata
   organization: Organization! @derivedFrom(field: "apps")
   roles: [Role!] @derivedFrom(field: "app")
 }

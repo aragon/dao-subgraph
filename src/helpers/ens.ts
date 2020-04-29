@@ -5,7 +5,7 @@ import { ENS } from '../types/templates/Organization/ENS'
 import { PublicResolver } from '../types/templates/Organization/PublicResolver'
 
 // TODO: Handle with mustache
-const ENS_ADDRESS = '0x5f6F7E8cc7346a11ca2dEf8f827b7a0b612c56a1'
+const ENS_ADDRESS = '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e'
 
 export function resolveRepoAddress(
   appId: Bytes

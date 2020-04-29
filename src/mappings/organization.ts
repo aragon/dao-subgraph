@@ -1,4 +1,4 @@
-import { Address, Bytes } from '@graphprotocol/graph-ts'
+import { Address, Bytes, log } from '@graphprotocol/graph-ts'
 
 import { resolveRepoAddress } from '../helpers/ens'
 import { getAppMetadata } from '../helpers/ipfs'
@@ -53,18 +53,28 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
     let implementation : Address
     if (isUpgradeable) {
       const appUpgradeable = AppProxyUpgradeableContract.bind(event.params.proxy)
-      implementation = appUpgradeable.implementation()
+      let callResult = appUpgradeable.try_implementation()
+      if (callResult.reverted) {
+        log.info("appUpgradeable reverted", [])
+      } else {
+        implementation = callResult.value
+      }
     } else {
       const appPinned = AppProxyPinnedContract.bind(event.params.proxy)
-      implementation = appPinned.implementation()
+      let callResult = appPinned.try_implementation()
+      if (callResult.reverted) {
+        log.info("appPinned reverted", [])
+      } else {
+        implementation = callResult.value
+      }
     }
 
-    // Use ens to resolve repo address
-    const repo = resolveRepoAddress(event.params.appId).toHex()
+    // // Use ens to resolve repo address
+    // const repo = resolveRepoAddress(event.params.appId).toHex()
 
-    // Fetch files from ipfs
-    const artifact = getAppMetadata(repo, 'artifact.json')
-    const manifest = getAppMetadata(repo, 'manifest.json')
+    // // Fetch files from ipfs
+    // const artifact = getAppMetadata(repo, 'artifact.json')
+    // const manifest = getAppMetadata(repo, 'manifest.json')
 
     // Create app
     let app = AppEntity.load(proxy)
@@ -74,9 +84,9 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
       app.appId = appId
       app.isForwarder = isForwarder
       app.isUpgradeable = isUpgradeable
-      app.repo = repo
-      app.artifact = artifact
-      app.manifest = manifest
+      // app.repo = repo
+      // app.artifact = artifact
+      // app.manifest = manifest
       app.implementation = implementation
     }
 
@@ -96,14 +106,19 @@ export function handleSetApp(event: SetAppEvent): void {
 
     const namespace = Bytes.fromHexString(KERNEL_APP_ADDR_NAMESPACE) as Bytes
 
-    const proxyAddress = kernel.getApp(
+    let callResult = kernel.try_getApp(
       namespace,
       event.params.appId
     )
+    if (callResult.reverted) {
+      log.info("kernel reverted", [])
+    } else {
+      const proxyAddress = callResult.value
 
-    const app = AppEntity.load(proxyAddress.toHex())
-    app.implementation = event.params.app
-
-    app.save()
+      const app = AppEntity.load(proxyAddress.toHex())
+      app.implementation = event.params.app
+  
+      app.save()
+    }
   }
 }
