@@ -10,7 +10,7 @@ import { Repo as RepoContract } from '../types/templates'
 export function handleNewRepo(event: NewRepo): void {
   let registry = APMRegistry.load('1')
 
-  // if no registry yet, set up blank initial
+  // if no factory yet, set up empty
   if (registry == null) {
     registry = new APMRegistry('1')
     registry.repoCount = 0
@@ -19,9 +19,9 @@ export function handleNewRepo(event: NewRepo): void {
   registry.repoCount = registry.repoCount + 1
 
   // create new repo
-  const repo = new Repo(event.params.id.toHexString()) as Repo
+  const repo = new Repo(event.params.repo.toHex()) as Repo
+  repo.node = event.params.id
   repo.name = event.params.name
-  repo.address = event.params.repo
 
   // add the dao for the derived relationship
   const currentRepos = registry.repos

@@ -7,7 +7,8 @@ type APMRegistry @entity {
 type Repo @entity {
   id: ID! # Repo ENS node
   name: String! # Repo name
-  address: Bytes! # Repo address
+  node: Bytes! # Repo address
+  lastVersion: Version! # Latests version
   versions: [Version!] @derivedFrom(field: "repo")
   apps: [App!] @derivedFrom(field: "repo")
 }

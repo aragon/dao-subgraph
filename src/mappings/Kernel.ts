@@ -1,4 +1,4 @@
-import { Address } from '@graphprotocol/graph-ts'
+import { Address, Bytes } from '@graphprotocol/graph-ts'
 
 import { resolveRepoAddress } from '../helpers/ens'
 import { getAppMetadata } from '../helpers/ipfs'
@@ -8,13 +8,12 @@ import { Kernel, ACL, App } from '../types/schema'
 
 // Import templates types
 import {
-  ACL as ACLContract,
-  Kernel as KernelContract,
+  ACL as ACLTemplate
 } from '../types/templates'
 import { AppProxyForwarder } from '../types/templates/Kernel/AppProxyForwarder'
 import { AppProxyPinned } from '../types/templates/Kernel/AppProxyPinned'
 import { AppProxyUpgradeable } from '../types/templates/Kernel/AppProxyUpgradeable'
-import { SetApp, NewAppProxy } from '../types/templates/Kernel/Kernel'
+import { Kernel as KernelContract, NewAppProxy, SetApp } from '../types/templates/Kernel/Kernel'
 
 import {
   KERNEL_DEFAULT_ACL_APP_ID,
@@ -36,17 +35,18 @@ export function handleNewProxyApp(event: NewAppProxy): void {
       const acl = new ACL(proxy) as ACL
       acl.save()
       kernel.acl = proxy
-      ACLContract.create(event.params.proxy)
+      ACLTemplate.create(event.params.proxy)
     }
 
+    // TODO: how we can handle forwarders
     // Check if app is forwarder
-    let isForwarder : boolean
-    try {
-      const appForwarder = AppProxyForwarder.bind(event.params.proxy)
-      isForwarder = appForwarder.isForwarder()
-    } catch (e) {
-      isForwarder = false
-    }
+    // let isForwarder : boolean
+    // try {
+    //   const appForwarder = AppProxyForwarder.bind(event.params.proxy)
+    //   isForwarder = appForwarder.isForwarder()
+    // } catch (e) {
+    //   isForwarder = false
+    // }
 
     // Handle implementation
     let implementation : Address
@@ -58,20 +58,19 @@ export function handleNewProxyApp(event: NewAppProxy): void {
       implementation = appPinned.implementation()
     }
 
-    // use ens to resolve repo address
+    // Use ens to resolve repo address
     const repo = resolveRepoAddress(event.params.appId).toHex()
 
     // Fetch files from ipfs
-    const repoData = getAppMetadata(repo)
-    const artifact = repoData.artifact
-    const manifest = repoData.manifest
+    const artifact = getAppMetadata(repo, 'artifact.json')
+    const manifest = getAppMetadata(repo, 'manifest.json')
 
     // Create app
     let app = App.load(proxy)
     if (app == null) {
       app = new App(proxy) as App
       app.appId = appId
-      app.isForwarder = isForwarder
+      app.isForwarder = false //isForwarder
       app.isUpgradeable = isUpgradeable
       app.repo = repo
       app.artifact = artifact
@@ -92,8 +91,11 @@ export function handleSetApp(event: SetApp): void {
   // Only care about changes if they're in the APP_BASE namespace
   if (event.params.namespace.toHex() === KERNEL_APP_BASES_NAMESPACE) {
     let kernel = KernelContract.bind(event.address)
+
+    const namespace = Bytes.fromHexString(KERNEL_APP_ADDR_NAMESPACE) as Bytes
+
     const proxyAddress = kernel.getApp(
-      KERNEL_APP_ADDR_NAMESPACE,
+      namespace,
       event.params.appId
     )
 

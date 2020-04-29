@@ -67,7 +67,7 @@ export function handleChangePermissionManager(
     .concat('-')
     .concat(event.params.role.toHexString())
 
-  // if no Role yet create new one
+  // If no Role yet create new one
   let role = Role.load(roleId)
   if (role == null) {
     role = new Role(roleId) as Role
@@ -75,7 +75,7 @@ export function handleChangePermissionManager(
     role.app = app
   }
 
-  // update values
+  // Update values
   role.manager = manager
 
   role.save()
