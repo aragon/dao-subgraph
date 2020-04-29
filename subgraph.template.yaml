@@ -6,9 +6,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: DAOFactory
-    network: mainnet
+    network: {{network}}
     source:
-      address: '0x5d94e3e7aec542ab0f9129b9a7badeb5b3ca0f77'
+      address: '{{daoFactory}}'
       abi: DAOFactory
     mapping:
       kind: ethereum/events
@@ -26,9 +26,9 @@ dataSources:
       file: ./src/mappings/DAOFactory.ts
   # - kind: ethereum/contract
   #   name: DAOFactory 0.8
-  #   network: mainnet
+  #   network: {{network}}
   #   source:
-  #     address: ''
+  #     address: '{{daoFactory08}}'
   #     abi: DAOFactory
   #   mapping:
   #     kind: ethereum/events
@@ -46,9 +46,9 @@ dataSources:
   #     file: ./src/mappings/DAOFactory.ts
   # - kind: ethereum/contract
   #   name: DAOFactory 0.7
-  #   network: mainnet
+  #   network: {{network}}
   #   source:
-  #     address: ''
+  #     address: '{{daoFactory07}}'
   #     abi: DAOFactory
   #   mapping:
   #     kind: ethereum/events
@@ -66,9 +66,9 @@ dataSources:
   #     file: ./src/mappings/DAOFactory.ts
   # - kind: ethereum/contract
   #   name: DAOFactory 0.6
-  #   network: mainnet
+  #   network: {{network}}
   #   source:
-  #     address: ''
+  #     address: '{{daoFactory06}}'
   #     abi: DAOFactory
   #   mapping:
   #     kind: ethereum/events
@@ -87,9 +87,9 @@ dataSources:
   - kind: ethereum/contract
     # TODO: Add data source for hatch and open Registries
     name: APMRegistry
-    network: mainnet
+    network: {{network}}
     source:
-      address: '0x32296d9f8fed89658668875dc73cacf87e8888b2'
+      address: '{{apmRegistry}}'
       abi: APMRegistry
     mapping:
       kind: ethereum/events
@@ -110,7 +110,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: Kernel
-    network: mainnet
+    network: {{network}}
     source:
       abi: Kernel
     mapping:
@@ -144,7 +144,7 @@ templates:
       file: ./src/mappings/Kernel.ts
   - kind: ethereum/contract
     name: ACL
-    network: mainnet
+    network: {{network}}
     source:
       abi: ACL
     mapping:
@@ -168,7 +168,7 @@ templates:
       file: ./src/mappings/ACL.ts
   - kind: ethereum/contract
     name: Repo
-    network: mainnet
+    network: {{network}}
     source:
       abi: Repo
     mapping:

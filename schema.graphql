@@ -1,39 +1,71 @@
+type APMRegistry @entity {
+  id: ID!
+  repoCount: Int!
+  repos: [Repo!]
+}
+
+type Repo @entity {
+  id: ID! # Repo ENS node
+  name: String! # Repo name
+  address: Bytes! # Repo address
+  versions: [Version!] @derivedFrom(field: "repo")
+  apps: [App!] @derivedFrom(field: "repo")
+}
+
+type Version @entity {
+  id: ID! # ID is concatenation of versionId and semanticVersion
+  semanticVersion: String! # Semantic version
+  contractAddress: Bytes! # Smart contract address
+  content: String! # Content URI
+  repo: Repo! # Repo entity
+}
+
 type DAOFactory @entity {
-    id: ID!
-    daoCount: Int!
-    daos: [Kernel!]!
+  id: ID!
+  daoCount: Int!
+  daos: [Kernel!]
 }
 
 type Kernel @entity {
-    id: ID!                             # Kernel proxy address
-    acl: ACL                            # ACL
-    appsBases: [AppBase!]               # Relationship to app base
-    appsProxies: [AppProxy!]            # Relationship to app proxy
-}
-
-type AppBase @entity {
-    id: ID!                             # App base address
-    namespace: String!                  # Specifies the type of app
-    appID: String!                      # ENS namehash of the aragonPM repo
-    address: Bytes!                     # Address of the app instance or base 
-}
-
-type AppProxy @entity {
-    id: ID!                             # App proxy address
-    appID: String!                      # ENS namehash of the aragonPM repo
-    isUpgradeable: Boolean!             # Whether the app is upgradeablebase
-    address: Bytes!                     # App proxy address
+  id: ID! # Kernel proxy address
+  acl: ACL! # ACL entity
+  recoveryVault: Bytes! # Address of the recovery Vault instance
+  apps: [App!] # Relationship to app
+  factory: DAOFactory! @derivedFrom(field: "daos") # DAOFactory entity
 }
 
 type ACL @entity {
-    id: ID!                             # ACL proxy address
-    permissions: [Permission!]          # 
+  id: ID! # ACL proxy address
+  kernel: Kernel! @derivedFrom(field: "acl") # Kernel entity
+  permissions: [Permission!]! # Permission object
 }
 
 type Permission @entity {
-    id: ID!                             # 
-    entity: String!                     # Specifies the type of app
-    app: String!                        # ENS namehash of the aragonPM repo
-    role: Bytes!                        # Address of the app instance or base 
-    manager: Bytes!                     #
+  id: ID! # ID is concatenation of app, role and entity
+  app: App! # App entity
+  role: Role! # Role entity
+  entity: Bytes! # Address assigned the permissions
+  allowed: Boolean # Entity has permissions
+  # TODO: Add parms
+}
+
+type App @entity {
+  id: ID! # App proxy address
+  appId: String! # ENS namehash of the aragonPM repo
+  kernel: Kernel! @derivedFrom(field: "apps") # Kernel entity
+  isForwarder: Boolean! # Whether the app is Forwarder
+  isUpgradeable: Boolean! # Whether the app is upgradeable
+  implementation: Bytes! # Address of the app instance or base
+  repo: Repo! # Repo entity
+  artifact: String! # Artifact.json metadata
+  manifest: String! # Manifest.json metadata
+  roles: [Role!] @derivedFrom(field: "app")
+}
+
+type Role @entity {
+  id: ID! # ID is concatenation of app and role hash
+  app: App! # App entity
+  role: String! # Role name
+  manager: Bytes! # Manager address
+  allowedEntities: [Permission!] @derivedFrom(field: "role")
 }
