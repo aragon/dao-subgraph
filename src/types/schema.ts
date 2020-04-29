@@ -12,6 +12,213 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
+export class APMRegistry extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save APMRegistry entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save APMRegistry entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("APMRegistry", id.toString(), this);
+  }
+
+  static load(id: string): APMRegistry | null {
+    return store.get("APMRegistry", id) as APMRegistry | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get repoCount(): i32 {
+    let value = this.get("repoCount");
+    return value.toI32();
+  }
+
+  set repoCount(value: i32) {
+    this.set("repoCount", Value.fromI32(value));
+  }
+
+  get repos(): Array<string> | null {
+    let value = this.get("repos");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set repos(value: Array<string> | null) {
+    if (value === null) {
+      this.unset("repos");
+    } else {
+      this.set("repos", Value.fromStringArray(value as Array<string>));
+    }
+  }
+}
+
+export class Repo extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Repo entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Repo entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Repo", id.toString(), this);
+  }
+
+  static load(id: string): Repo | null {
+    return store.get("Repo", id) as Repo | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get name(): string {
+    let value = this.get("name");
+    return value.toString();
+  }
+
+  set name(value: string) {
+    this.set("name", Value.fromString(value));
+  }
+
+  get address(): Bytes {
+    let value = this.get("address");
+    return value.toBytes();
+  }
+
+  set address(value: Bytes) {
+    this.set("address", Value.fromBytes(value));
+  }
+
+  get versions(): Array<string> | null {
+    let value = this.get("versions");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set versions(value: Array<string> | null) {
+    if (value === null) {
+      this.unset("versions");
+    } else {
+      this.set("versions", Value.fromStringArray(value as Array<string>));
+    }
+  }
+
+  get apps(): Array<string> | null {
+    let value = this.get("apps");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set apps(value: Array<string> | null) {
+    if (value === null) {
+      this.unset("apps");
+    } else {
+      this.set("apps", Value.fromStringArray(value as Array<string>));
+    }
+  }
+}
+
+export class Version extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Version entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Version entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Version", id.toString(), this);
+  }
+
+  static load(id: string): Version | null {
+    return store.get("Version", id) as Version | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get semanticVersion(): string {
+    let value = this.get("semanticVersion");
+    return value.toString();
+  }
+
+  set semanticVersion(value: string) {
+    this.set("semanticVersion", Value.fromString(value));
+  }
+
+  get contractAddress(): Bytes {
+    let value = this.get("contractAddress");
+    return value.toBytes();
+  }
+
+  set contractAddress(value: Bytes) {
+    this.set("contractAddress", Value.fromBytes(value));
+  }
+
+  get content(): string {
+    let value = this.get("content");
+    return value.toString();
+  }
+
+  set content(value: string) {
+    this.set("content", Value.fromString(value));
+  }
+
+  get repo(): string {
+    let value = this.get("repo");
+    return value.toString();
+  }
+
+  set repo(value: string) {
+    this.set("repo", Value.fromString(value));
+  }
+}
+
 export class DAOFactory extends Entity {
   constructor(id: string) {
     super();
@@ -51,13 +258,21 @@ export class DAOFactory extends Entity {
     this.set("daoCount", Value.fromI32(value));
   }
 
-  get daos(): Array<string> {
+  get daos(): Array<string> | null {
     let value = this.get("daos");
-    return value.toStringArray();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toStringArray();
+    }
   }
 
-  set daos(value: Array<string>) {
-    this.set("daos", Value.fromStringArray(value));
+  set daos(value: Array<string> | null) {
+    if (value === null) {
+      this.unset("daos");
+    } else {
+      this.set("daos", Value.fromStringArray(value as Array<string>));
+    }
   }
 }
 
@@ -91,25 +306,26 @@ export class Kernel extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get acl(): string | null {
+  get acl(): string {
     let value = this.get("acl");
-    if (value === null) {
-      return null;
-    } else {
-      return value.toString();
-    }
+    return value.toString();
   }
 
-  set acl(value: string | null) {
-    if (value === null) {
-      this.unset("acl");
-    } else {
-      this.set("acl", Value.fromString(value as string));
-    }
+  set acl(value: string) {
+    this.set("acl", Value.fromString(value));
   }
 
-  get appsBases(): Array<string> | null {
-    let value = this.get("appsBases");
+  get recoveryVault(): Bytes {
+    let value = this.get("recoveryVault");
+    return value.toBytes();
+  }
+
+  set recoveryVault(value: Bytes) {
+    this.set("recoveryVault", Value.fromBytes(value));
+  }
+
+  get apps(): Array<string> | null {
+    let value = this.get("apps");
     if (value === null) {
       return null;
     } else {
@@ -117,145 +333,21 @@ export class Kernel extends Entity {
     }
   }
 
-  set appsBases(value: Array<string> | null) {
+  set apps(value: Array<string> | null) {
     if (value === null) {
-      this.unset("appsBases");
+      this.unset("apps");
     } else {
-      this.set("appsBases", Value.fromStringArray(value as Array<string>));
+      this.set("apps", Value.fromStringArray(value as Array<string>));
     }
   }
 
-  get appsProxies(): Array<string> | null {
-    let value = this.get("appsProxies");
-    if (value === null) {
-      return null;
-    } else {
-      return value.toStringArray();
-    }
-  }
-
-  set appsProxies(value: Array<string> | null) {
-    if (value === null) {
-      this.unset("appsProxies");
-    } else {
-      this.set("appsProxies", Value.fromStringArray(value as Array<string>));
-    }
-  }
-}
-
-export class AppBase extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save AppBase entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save AppBase entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("AppBase", id.toString(), this);
-  }
-
-  static load(id: string): AppBase | null {
-    return store.get("AppBase", id) as AppBase | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
+  get factory(): string {
+    let value = this.get("factory");
     return value.toString();
   }
 
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get namespace(): string {
-    let value = this.get("namespace");
-    return value.toString();
-  }
-
-  set namespace(value: string) {
-    this.set("namespace", Value.fromString(value));
-  }
-
-  get appID(): string {
-    let value = this.get("appID");
-    return value.toString();
-  }
-
-  set appID(value: string) {
-    this.set("appID", Value.fromString(value));
-  }
-
-  get address(): Bytes {
-    let value = this.get("address");
-    return value.toBytes();
-  }
-
-  set address(value: Bytes) {
-    this.set("address", Value.fromBytes(value));
-  }
-}
-
-export class AppProxy extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save AppProxy entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save AppProxy entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("AppProxy", id.toString(), this);
-  }
-
-  static load(id: string): AppProxy | null {
-    return store.get("AppProxy", id) as AppProxy | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get appID(): string {
-    let value = this.get("appID");
-    return value.toString();
-  }
-
-  set appID(value: string) {
-    this.set("appID", Value.fromString(value));
-  }
-
-  get isUpgradeable(): boolean {
-    let value = this.get("isUpgradeable");
-    return value.toBoolean();
-  }
-
-  set isUpgradeable(value: boolean) {
-    this.set("isUpgradeable", Value.fromBoolean(value));
-  }
-
-  get address(): Bytes {
-    let value = this.get("address");
-    return value.toBytes();
-  }
-
-  set address(value: Bytes) {
-    this.set("address", Value.fromBytes(value));
+  set factory(value: string) {
+    this.set("factory", Value.fromString(value));
   }
 }
 
@@ -289,21 +381,22 @@ export class ACL extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get permissions(): Array<string> | null {
-    let value = this.get("permissions");
-    if (value === null) {
-      return null;
-    } else {
-      return value.toStringArray();
-    }
+  get kernel(): string {
+    let value = this.get("kernel");
+    return value.toString();
   }
 
-  set permissions(value: Array<string> | null) {
-    if (value === null) {
-      this.unset("permissions");
-    } else {
-      this.set("permissions", Value.fromStringArray(value as Array<string>));
-    }
+  set kernel(value: string) {
+    this.set("kernel", Value.fromString(value));
+  }
+
+  get permissions(): Array<string> {
+    let value = this.get("permissions");
+    return value.toStringArray();
+  }
+
+  set permissions(value: Array<string>) {
+    this.set("permissions", Value.fromStringArray(value));
   }
 }
 
@@ -337,13 +430,191 @@ export class Permission extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get entity(): string {
-    let value = this.get("entity");
+  get app(): string {
+    let value = this.get("app");
     return value.toString();
   }
 
-  set entity(value: string) {
-    this.set("entity", Value.fromString(value));
+  set app(value: string) {
+    this.set("app", Value.fromString(value));
+  }
+
+  get role(): string {
+    let value = this.get("role");
+    return value.toString();
+  }
+
+  set role(value: string) {
+    this.set("role", Value.fromString(value));
+  }
+
+  get entity(): Bytes {
+    let value = this.get("entity");
+    return value.toBytes();
+  }
+
+  set entity(value: Bytes) {
+    this.set("entity", Value.fromBytes(value));
+  }
+
+  get allowed(): boolean {
+    let value = this.get("allowed");
+    return value.toBoolean();
+  }
+
+  set allowed(value: boolean) {
+    this.set("allowed", Value.fromBoolean(value));
+  }
+}
+
+export class App extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save App entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save App entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("App", id.toString(), this);
+  }
+
+  static load(id: string): App | null {
+    return store.get("App", id) as App | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get appId(): string {
+    let value = this.get("appId");
+    return value.toString();
+  }
+
+  set appId(value: string) {
+    this.set("appId", Value.fromString(value));
+  }
+
+  get kernel(): string {
+    let value = this.get("kernel");
+    return value.toString();
+  }
+
+  set kernel(value: string) {
+    this.set("kernel", Value.fromString(value));
+  }
+
+  get isForwarder(): boolean {
+    let value = this.get("isForwarder");
+    return value.toBoolean();
+  }
+
+  set isForwarder(value: boolean) {
+    this.set("isForwarder", Value.fromBoolean(value));
+  }
+
+  get isUpgradeable(): boolean {
+    let value = this.get("isUpgradeable");
+    return value.toBoolean();
+  }
+
+  set isUpgradeable(value: boolean) {
+    this.set("isUpgradeable", Value.fromBoolean(value));
+  }
+
+  get implementation(): Bytes {
+    let value = this.get("implementation");
+    return value.toBytes();
+  }
+
+  set implementation(value: Bytes) {
+    this.set("implementation", Value.fromBytes(value));
+  }
+
+  get repo(): string {
+    let value = this.get("repo");
+    return value.toString();
+  }
+
+  set repo(value: string) {
+    this.set("repo", Value.fromString(value));
+  }
+
+  get artifact(): string {
+    let value = this.get("artifact");
+    return value.toString();
+  }
+
+  set artifact(value: string) {
+    this.set("artifact", Value.fromString(value));
+  }
+
+  get manifest(): string {
+    let value = this.get("manifest");
+    return value.toString();
+  }
+
+  set manifest(value: string) {
+    this.set("manifest", Value.fromString(value));
+  }
+
+  get roles(): Array<string> | null {
+    let value = this.get("roles");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set roles(value: Array<string> | null) {
+    if (value === null) {
+      this.unset("roles");
+    } else {
+      this.set("roles", Value.fromStringArray(value as Array<string>));
+    }
+  }
+}
+
+export class Role extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Role entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Role entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Role", id.toString(), this);
+  }
+
+  static load(id: string): Role | null {
+    return store.get("Role", id) as Role | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
   }
 
   get app(): string {
@@ -355,13 +626,13 @@ export class Permission extends Entity {
     this.set("app", Value.fromString(value));
   }
 
-  get role(): Bytes {
+  get role(): string {
     let value = this.get("role");
-    return value.toBytes();
+    return value.toString();
   }
 
-  set role(value: Bytes) {
-    this.set("role", Value.fromBytes(value));
+  set role(value: string) {
+    this.set("role", Value.fromString(value));
   }
 
   get manager(): Bytes {
@@ -371,5 +642,25 @@ export class Permission extends Entity {
 
   set manager(value: Bytes) {
     this.set("manager", Value.fromBytes(value));
+  }
+
+  get allowedEntities(): Array<string> | null {
+    let value = this.get("allowedEntities");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set allowedEntities(value: Array<string> | null) {
+    if (value === null) {
+      this.unset("allowedEntities");
+    } else {
+      this.set(
+        "allowedEntities",
+        Value.fromStringArray(value as Array<string>)
+      );
+    }
   }
 }

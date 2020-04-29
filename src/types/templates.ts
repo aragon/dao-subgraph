@@ -13,3 +13,9 @@ export class ACL extends DataSourceTemplate {
     DataSourceTemplate.create("ACL", [address.toHex()]);
   }
 }
+
+export class Repo extends DataSourceTemplate {
+  static create(address: Address): void {
+    DataSourceTemplate.create("Repo", [address.toHex()]);
+  }
+}
