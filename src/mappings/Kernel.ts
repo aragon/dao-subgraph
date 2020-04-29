@@ -38,15 +38,15 @@ export function handleNewProxyApp(event: NewAppProxy): void {
       ACLTemplate.create(event.params.proxy)
     }
 
-    // TODO: how we can handle forwarders
     // Check if app is forwarder
-    // let isForwarder : boolean
-    // try {
-    //   const appForwarder = AppProxyForwarder.bind(event.params.proxy)
-    //   isForwarder = appForwarder.isForwarder()
-    // } catch (e) {
-    //   isForwarder = false
-    // }
+    let isForwarder : boolean
+    const appForwarder = AppProxyForwarder.bind(event.params.proxy)
+    let callResult = appForwarder.try_isForwarder()
+    if (callResult.reverted) {
+      isForwarder = false
+    } else {
+      isForwarder = callResult.value
+    }
 
     // Handle implementation
     let implementation : Address
