@@ -8,8 +8,8 @@
     "codegen": "graph codegen --output-dir src/types/",
     "draw-schema": "./scripts/draw-schema.sh",
     "create:rpc": "graph create dao-subgraph --node http://127.0.0.1:8020",
-    "deploy:rpc": "graph deploy dao-subgraph --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
-    "deploy": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy:rpc": "graph deploy dao-subgraph --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "deploy": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ 0xGabi/dao-subgraph --access-token 438d100657cb421e9324ebfdd3b36ec2",
     "watch-local": "graph deploy dao-subgraph --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001",
     "prepare:devchain": "mustache config/devchain.json subgraph.template.yaml > subgraph.yaml",
     "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
@@ -24,7 +24,6 @@
     "mustache": "^4.0.1"
   },
   "dependencies": {
-    "@aragon/os": "^4.4.0",
     "graphqlviz": "^3.1.0"
   }
 }

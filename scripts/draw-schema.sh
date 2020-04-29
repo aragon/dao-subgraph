@@ -16,8 +16,8 @@ schema {
 }
 
 type Query {
-  daoFactory: DAOFactory
-  apmRegistry: APMRegistry
+  Factory: Factory
+  Registry: Registry
 }
 ' > schema.graphql
 

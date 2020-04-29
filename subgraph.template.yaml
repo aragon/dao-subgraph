@@ -5,7 +5,8 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: DAOFactory
+    # TODO: Add data source for other factories
+    name: Factory
     network: {{network}}
     source:
       address: '{{daoFactory}}'
@@ -15,78 +16,20 @@ dataSources:
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
-        - DAOFactory
-        - Kernel
+        - Factory
+        - Organization
       abis:
         - name: DAOFactory
-          file: ./node_modules/@aragon/os/abi/DAOFactory.json
+          file: ./abis/DAOFactory.json
+        - name: Kernel
+          file: ./abis/Kernel.json
       eventHandlers:
         - event: DeployDAO(address)
           handler: handleDeployDAO
-      file: ./src/mappings/DAOFactory.ts
-  # - kind: ethereum/contract
-  #   name: DAOFactory 0.8
-  #   network: {{network}}
-  #   source:
-  #     address: '{{daoFactory08}}'
-  #     abi: DAOFactory
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.3
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - DAOFactory
-  #       - Kernel
-  #     abis:
-  #       - name: DAOFactory
-  #         file: ./node_modules/@aragon/os/abi/DAOFactory.json
-  #     eventHandlers:
-  #       - event: DeployDAO(address)
-  #         handler: handleDeployDAO
-  #     file: ./src/mappings/DAOFactory.ts
-  # - kind: ethereum/contract
-  #   name: DAOFactory 0.7
-  #   network: {{network}}
-  #   source:
-  #     address: '{{daoFactory07}}'
-  #     abi: DAOFactory
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.3
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - DAOFactory
-  #       - Kernel
-  #     abis:
-  #       - name: DAOFactory
-  #         file: ./node_modules/@aragon/os/abi/DAOFactory.json
-  #     eventHandlers:
-  #       - event: DeployDAO(address)
-  #         handler: handleDeployDAO
-  #     file: ./src/mappings/DAOFactory.ts
-  # - kind: ethereum/contract
-  #   name: DAOFactory 0.6
-  #   network: {{network}}
-  #   source:
-  #     address: '{{daoFactory06}}'
-  #     abi: DAOFactory
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.3
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - DAOFactory
-  #       - Kernel
-  #     abis:
-  #       - name: DAOFactory
-  #         file: ./node_modules/@aragon/os/abi/DAOFactory.json
-  #     eventHandlers:
-  #       - event: DeployDAO(address)
-  #         handler: handleDeployDAO
-  #     file: ./src/mappings/DAOFactory.ts
+      file: ./src/mappings/factory.ts
   - kind: ethereum/contract
     # TODO: Add data source for hatch and open Registries
-    name: APMRegistry
+    name: Registry
     network: {{network}}
     source:
       address: '{{apmRegistry}}'
@@ -96,20 +39,20 @@ dataSources:
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
-        - APMRegistry
+        - Registry
         - Repo
       abis:
         - name: APMRegistry
-          file: ./node_modules/@aragon/os/abi/APMRegistry.json
+          file: ./abis/APMRegistry.json
       eventHandlers:
         - event: NewRepo(bytes32,string,address)
           handler: handleNewRepo
         - event: NewAppProxy(address,bool,bytes32)
           handler: handleNewProxyApp
-      file: ./src/mappings/APMRegistry.ts
+      file: ./src/mappings/registry.ts
 templates:
   - kind: ethereum/contract
-    name: Kernel
+    name: Organization
     network: {{network}}
     source:
       abi: Kernel
@@ -118,32 +61,32 @@ templates:
       apiVersion: 0.0.1
       language: wasm/assemblyscript
       entities:
-        - Kernel
-        - ACL
+        - Organization
+        - Acl
         - App
       abis:
         - name: Kernel
-          file: ./node_modules/@aragon/os/abi/Kernel.json
+          file: ./abis/Kernel.json
         - name: ACL
-          file: ./node_modules/@aragon/os/abi/ACL.json
+          file: ./abis/ACL.json
         - name: AppProxyPinned
-          file: ./node_modules/@aragon/os/abi/AppProxyPinned.json
+          file: ./abis/AppProxyPinned.json
         - name: AppProxyUpgradeable
-          file: ./node_modules/@aragon/os/abi/AppProxyUpgradeable.json
+          file: ./abis/AppProxyUpgradeable.json
         - name: AppProxyForwarder
-          file: ./node_modules/@aragon/os/abi/IForwarder.json
+          file: ./abis/IForwarder.json
         - name: ENS
-          file: ./node_modules/@aragon/os/abi/ENS.json
+          file: ./abis/ENS.json
         - name: PublicResolver
-          file: ./node_modules/@aragon/os/abi/PublicResolver.json
+          file: ./abis/PublicResolver.json
       eventHandlers:
         - event: SetApp(indexed bytes32,indexed bytes32,address)
           handler: handleSetApp
         - event: NewAppProxy(address,bool,bytes32)
           handler: handleNewProxyApp
-      file: ./src/mappings/Kernel.ts
+      file: ./src/mappings/organization.ts
   - kind: ethereum/contract
-    name: ACL
+    name: Acl
     network: {{network}}
     source:
       abi: ACL
@@ -152,12 +95,12 @@ templates:
       apiVersion: 0.0.1
       language: wasm/assemblyscript
       entities:
-        - ACL
+        - Acl
         - Permission
         - Role
       abis:
         - name: ACL
-          file: ./node_modules/@aragon/os/abi/ACL.json
+          file: ./abis/ACL.json
       eventHandlers:
         - event: SetPermission(indexed address,indexed address,indexed bytes32,bool)
           handler: handleSetPermission
@@ -165,7 +108,7 @@ templates:
           handler: handleSetPermissionParams
         - event: ChangePermissionManager(indexed address,indexed bytes32,indexed address)
           handler: handleChangePermissionManager
-      file: ./src/mappings/ACL.ts
+      file: ./src/mappings/acl.ts
   - kind: ethereum/contract
     name: Repo
     network: {{network}}
@@ -180,8 +123,8 @@ templates:
         - Version
       abis:
         - name: Repo
-          file: ./node_modules/@aragon/os/abi/Repo.json
+          file: ./abis/Repo.json
       eventHandlers:
         - event: NewVersion(uint256,uint16[3])
           handler: handleNewVersion
-      file: ./src/mappings/Repo.ts
+      file: ./src/mappings/repo.ts
