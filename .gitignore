@@ -4,6 +4,10 @@
 # Compilation output
 build/
 
+# Production
+types
+subgraph.yaml
+
 # Code coverage artifacts
 /coverage
 /.nyc_output
