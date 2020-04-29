@@ -1,12 +1,12 @@
 // Import entity types from the schema
-import { Repo, Version } from '../types/schema'
+import { Repo as RepoEntity, Version as VersionEntity } from '../types/schema'
 
 // Import templates types
-import { NewVersion, Repo as RepoContract } from '../types/templates/Repo/Repo'
+import { NewVersion as NewVersionEvent, Repo as RepoContract } from '../types/templates/Repo/Repo'
 
-export function handleNewVersion(event: NewVersion): void {
+export function handleNewVersion(event: NewVersionEvent): void {
   const repoId = event.address.toHex()
-  const repo = Repo.load(repoId)
+  const repo = RepoEntity.load(repoId)
 
   if (repo !== null) {
     const repoContract = RepoContract.bind(event.address)
@@ -18,9 +18,9 @@ export function handleNewVersion(event: NewVersion): void {
       .concat(event.params.semanticVersion.toString())
 
     // create new version
-    let version = Version.load(versionId)
+    let version = VersionEntity.load(versionId)
     if (version == null) {
-      version = new Version(versionId) as Version
+      version = new VersionEntity(versionId) as VersionEntity
       version.semanticVersion = event.params.semanticVersion.toString()
       version.contractAddress = versionData.value1
       version.content = versionData.value2.toHexString()

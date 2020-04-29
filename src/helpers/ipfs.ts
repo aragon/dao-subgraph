@@ -1,4 +1,4 @@
-import { ipfs } from '@graphprotocol/graph-ts'
+import { ipfs, log } from '@graphprotocol/graph-ts'
 
 import { Repo, Version } from '../types/schema'
 

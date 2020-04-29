@@ -1,18 +1,16 @@
 // Import entity types from the schema
-import { ACL, Permission, Role } from '../types/schema'
+import { Acl as AclEntity, Permission as PermissionEntity, Role as RoleEntity } from '../types/schema'
 
 // Import event types from the templates contract ABI
 import {
-  SetPermission,
-  SetPermissionParams,
-  ChangePermissionManager,
-} from '../types/templates/ACL/ACL'
+  SetPermission as SetPermissionEvent,
+  SetPermissionParams as SetPermissionParamsEvent,
+  ChangePermissionManager as ChangePermissionManagerEvent,
+} from '../types/templates/Acl/ACL'
 
-import {} from './constants'
-
-export function handleSetPermission(event: SetPermission): void {
+export function handleSetPermission(event: SetPermissionEvent): void {
   const aclId = event.address.toHex()
-  const acl = ACL.load(aclId)
+  const acl = AclEntity.load(aclId)
 
   if (acl !== null) {
     const app = event.params.app.toHex()
@@ -34,9 +32,9 @@ export function handleSetPermission(event: SetPermission): void {
       .concat(event.params.entity.toHexString())
 
     // if no Permission yet create new one
-    let permission = Permission.load(permissionId)
+    let permission = PermissionEntity.load(permissionId)
     if (permission == null) {
-      permission = new Permission(permissionId) as Permission
+      permission = new PermissionEntity(permissionId) as PermissionEntity
       permission.app = app
       permission.role = role
       permission.entity = entity
@@ -55,7 +53,7 @@ export function handleSetPermission(event: SetPermission): void {
 }
 
 export function handleChangePermissionManager(
-  event: ChangePermissionManager
+  event: ChangePermissionManagerEvent
 ): void {
   const app = event.params.app.toHex()
   const roleName = event.params.role.toHexString()
@@ -68,9 +66,9 @@ export function handleChangePermissionManager(
     .concat(event.params.role.toHexString())
 
   // If no Role yet create new one
-  let role = Role.load(roleId)
+  let role = RoleEntity.load(roleId)
   if (role == null) {
-    role = new Role(roleId) as Role
+    role = new RoleEntity(roleId) as RoleEntity
     role.role = roleName
     role.app = app
   }
@@ -81,4 +79,4 @@ export function handleChangePermissionManager(
   role.save()
 }
 
-export function handleSetPermissionParams(event: SetPermissionParams): void {}
+export function handleSetPermissionParams(event: SetPermissionParamsEvent): void {}

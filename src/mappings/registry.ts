@@ -1,25 +1,26 @@
 // Import event types from the registrar contract ABI
-import { NewRepo, NewAppProxy } from '../types/APMRegistry/APMRegistry'
+import { NewRepo as NewRepoEvent, NewAppProxy as NewAppProxyEvent } from '../types/Registry/APMRegistry'
 
 // Import entity types from the schema
-import { APMRegistry, Repo } from '../types/schema'
+import { Registry as RegistryEntity, Repo as RepoEntity } from '../types/schema'
 
 // Import templates types
 import { Repo as RepoContract } from '../types/templates'
 
-export function handleNewRepo(event: NewRepo): void {
-  let registry = APMRegistry.load('1')
+export function handleNewRepo(event: NewRepoEvent): void {
+  let registry = RegistryEntity.load('1')
 
   // if no factory yet, set up empty
   if (registry == null) {
-    registry = new APMRegistry('1')
+    registry = new RegistryEntity('1')
     registry.repoCount = 0
     registry.repos = []
   }
   registry.repoCount = registry.repoCount + 1
 
   // create new repo
-  const repo = new Repo(event.params.repo.toHex()) as Repo
+  const repo = new RepoEntity(event.params.repo.toHex()) as RepoEntity
+  repo.address = event.params.repo
   repo.node = event.params.id
   repo.name = event.params.name
 
@@ -35,4 +36,4 @@ export function handleNewRepo(event: NewRepo): void {
   RepoContract.create(event.params.repo)
 }
 
-export function handleNewProxyApp(event: NewAppProxy): void {}
+export function handleNewProxyApp(event: NewAppProxyEvent): void {}

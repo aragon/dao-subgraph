@@ -4,43 +4,44 @@ import { resolveRepoAddress } from '../helpers/ens'
 import { getAppMetadata } from '../helpers/ipfs'
 
 // Import entity types from the schema
-import { Kernel, ACL, App } from '../types/schema'
+import { Organization as OrganizationEntity, Acl as AclEntity, App as AppEntity } from '../types/schema'
 
 // Import templates types
 import {
-  ACL as ACLTemplate
+  Acl as AclTemplate
 } from '../types/templates'
-import { AppProxyForwarder } from '../types/templates/Kernel/AppProxyForwarder'
-import { AppProxyPinned } from '../types/templates/Kernel/AppProxyPinned'
-import { AppProxyUpgradeable } from '../types/templates/Kernel/AppProxyUpgradeable'
-import { Kernel as KernelContract, NewAppProxy, SetApp } from '../types/templates/Kernel/Kernel'
+import { AppProxyForwarder as AppProxyForwarderContract } from '../types/templates/Organization/AppProxyForwarder'
+import { AppProxyPinned as AppProxyPinnedContract } from '../types/templates/Organization/AppProxyPinned'
+import { AppProxyUpgradeable as AppProxyUpgradeableContract } from '../types/templates/Organization/AppProxyUpgradeable'
+import { Kernel as KernelContract, NewAppProxy as NewAppProxyEvent, SetApp as SetAppEvent } from '../types/templates/Organization/Kernel'
 
 import {
   KERNEL_DEFAULT_ACL_APP_ID,
   KERNEL_APP_BASES_NAMESPACE,
   KERNEL_APP_ADDR_NAMESPACE,
-} from './constants'
+} from '../helpers/constants'
 
-export function handleNewProxyApp(event: NewAppProxy): void {
-  const kernelId = event.address.toHex()
-  const kernel = Kernel.load(kernelId)
+export function handleNewProxyApp(event: NewAppProxyEvent): void {
+  const orgId = event.address.toHex()
+  const org = OrganizationEntity.load(orgId)
 
-  if (kernel !== null) {
+  if (org !== null) {
     const proxy = event.params.proxy.toHex()
     const appId = event.params.appId.toHex()
     const isUpgradeable = event.params.isUpgradeable
 
     // Create ACL
     if (appId == KERNEL_DEFAULT_ACL_APP_ID) {
-      const acl = new ACL(proxy) as ACL
+      const acl = new AclEntity(proxy) as AclEntity
+      acl.address = event.params.proxy
       acl.save()
-      kernel.acl = proxy
-      ACLTemplate.create(event.params.proxy)
+      org.acl = proxy
+      AclTemplate.create(event.params.proxy)
     }
 
     // Check if app is forwarder
     let isForwarder : boolean
-    const appForwarder = AppProxyForwarder.bind(event.params.proxy)
+    const appForwarder = AppProxyForwarderContract.bind(event.params.proxy)
     let callResult = appForwarder.try_isForwarder()
     if (callResult.reverted) {
       isForwarder = false
@@ -51,10 +52,10 @@ export function handleNewProxyApp(event: NewAppProxy): void {
     // Handle implementation
     let implementation : Address
     if (isUpgradeable) {
-      const appUpgradeable = AppProxyUpgradeable.bind(event.params.proxy)
+      const appUpgradeable = AppProxyUpgradeableContract.bind(event.params.proxy)
       implementation = appUpgradeable.implementation()
     } else {
-      const appPinned = AppProxyPinned.bind(event.params.proxy)
+      const appPinned = AppProxyPinnedContract.bind(event.params.proxy)
       implementation = appPinned.implementation()
     }
 
@@ -66,11 +67,12 @@ export function handleNewProxyApp(event: NewAppProxy): void {
     const manifest = getAppMetadata(repo, 'manifest.json')
 
     // Create app
-    let app = App.load(proxy)
+    let app = AppEntity.load(proxy)
     if (app == null) {
-      app = new App(proxy) as App
+      app = new AppEntity(proxy) as AppEntity
+      app.address = event.params.proxy
       app.appId = appId
-      app.isForwarder = false //isForwarder
+      app.isForwarder = isForwarder
       app.isUpgradeable = isUpgradeable
       app.repo = repo
       app.artifact = artifact
@@ -78,16 +80,16 @@ export function handleNewProxyApp(event: NewAppProxy): void {
       app.implementation = implementation
     }
 
-    const kernelApps = kernel.apps || []
-    kernelApps.push(app.id)
-    kernel.apps = kernelApps
+    const orgApps = org.apps || []
+    orgApps.push(app.id)
+    org.apps = orgApps
 
     app.save()
-    kernel.save()
+    org.save()
   }
 }
 
-export function handleSetApp(event: SetApp): void {
+export function handleSetApp(event: SetAppEvent): void {
   // Only care about changes if they're in the APP_BASE namespace
   if (event.params.namespace.toHex() === KERNEL_APP_BASES_NAMESPACE) {
     let kernel = KernelContract.bind(event.address)
@@ -99,7 +101,7 @@ export function handleSetApp(event: SetApp): void {
       event.params.appId
     )
 
-    const app = App.load(proxyAddress.toHex())
+    const app = AppEntity.load(proxyAddress.toHex())
     app.implementation = event.params.app
 
     app.save()
