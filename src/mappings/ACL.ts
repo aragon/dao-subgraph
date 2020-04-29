@@ -1,180 +1,84 @@
 // Import entity types from the schema
-import {
-  ACL
-} from '../types/schema'
+import { ACL, Permission, Role } from '../types/schema'
 
 // Import event types from the templates contract ABI
-import {SetPermission, SetPermissionParams, ChangePermissionManager} from '../types/templates/ACL/ACL'
+import {
+  SetPermission,
+  SetPermissionParams,
+  ChangePermissionManager,
+} from '../types/templates/ACL/ACL'
 
-// // Import entity types from the schema
-// import {
-//   EVMScriptRegistryPermission,
-//   ACLPermission,
-//   KernelPermission,
-//   EVMScriptRegistryManagers,
-//   ACLManagers,
-//   KernelManagers,
-//   EVMScriptRegistry,
-//   ACL,
-//   Kernel
-// } from '../types/schema'
-
-// import {
-//   EVM_SCRIPT_REGISTRY_ADD_EXECUTOR_ROLE_HASH,
-//   EVM_SCRIPT_REGISTRY_MANAGER_ROLE_HASH, // alias for enable and disable executors
-//   roleLookupTable
-// } from './constants'
-
-//     mapping (bytes32 => bytes32) internal permissions; // permissions hash => params hash
-//     mapping (bytes32 => Param[]) internal permissionParams; // params hash => params
-
-//     // Who is the manager of a permission
-//     mapping (bytes32 => address) internal permissionManager;
-
-//     event SetPermission(address indexed entity, address indexed app, bytes32 indexed role, bool allowed);
-//     event SetPermissionParams(address indexed entity, address indexed app, bytes32 indexed role, bytes32 paramsHash);
-//     event ChangePermissionManager(address indexed app, bytes32 indexed role, address indexed manager);
-
-//     /**
-//     * @dev Internal function called to actually save the permission
-//     */
-//    function _setPermission(address _entity, address _app, bytes32 _role, bytes32 _paramsHash) internal {
-//     permissions[permissionHash(_entity, _app, _role)] = _paramsHash;
-//     bool entityHasPermission = _paramsHash != NO_PERMISSION;
-//     bool permissionHasParams = entityHasPermission && _paramsHash != EMPTY_PARAM_HASH;
-
-//     emit SetPermission(_entity, _app, _role, entityHasPermission);
-//     if (permissionHasParams) {
-//         emit SetPermissionParams(_entity, _app, _role, _paramsHash);
-//     }
-// }
+import {} from './constants'
 
 export function handleSetPermission(event: SetPermission): void {
-  const aclID = event.address.toHex()
-  const acl = ACL.load(aclID)
+  const aclId = event.address.toHex()
+  const acl = ACL.load(aclId)
 
-  // // EVMScriptRegistry
-  // else if (EVMScriptRegistry.load(id) != null) {
-  //   let evmsr = EVMScriptRegistryPermission.load(role)
-  //   if (evmsr == null) {
-  //     evmsr = new EVMScriptRegistryPermission(role)
-  //     evmsr.entities = new Array<string>()
-  //     evmsr.appAddress = id
-  //   }
-  //   if (event.params.allowed == true) {
-  //     let roleName = roleLookupTable.get(role) as string
-  //     evmsr.role = roleName
-  //     let entities = evmsr.entities
-  //     let i = entities.indexOf(entity)
-  //     if (i == -1) {
-  //       entities.push(entity)
-  //       evmsr.entities = entities
-  //       evmsr.save()
-  //     }
-  //   } else if (event.params.allowed == false) {
-  //     let entities = evmsr.entities
-  //     let i = entities.indexOf(entity)
-  //     entities.splice(i, 1)
-  //     evmsr.entities = entities
-  //     evmsr.save()
-  //   }
-  // }
+  if (acl !== null) {
+    const app = event.params.app.toHex()
+    const entity = event.params.entity
+    const allowed = event.params.allowed
 
-  // // ACL
-  // else if (ACL.load(id) != null) {
-  //   let aclp = ACLPermission.load(role)
-  //   if (aclp == null) {
-  //     aclp = new ACLPermission(role)
-  //     aclp.entities = new Array<string>()
-  //     aclp.appAddress = id
-  //   }
-  //   if (event.params.allowed == true) {
-  //     let roleName = roleLookupTable.get(role) as string
-  //     aclp.role = roleName
-  //     let entities = aclp.entities
-  //     let i = entities.indexOf(entity)
-  //     if (i == -1) {
-  //       entities.push(entity)
-  //       aclp.entities = entities
-  //       aclp.save()
-  //     }
-  //   } else if (event.params.allowed == false) {
-  //     let entities = aclp.entities
-  //     let i = entities.indexOf(entity)
-  //     entities.splice(i, 1)
-  //     aclp.entities = entities
-  //     aclp.save()
-  //   }
-  // }
+    // Generate role id
+    const role = event.params.app
+      .toHexString()
+      .concat('-')
+      .concat(event.params.role.toHexString())
 
-  // // Kernel
-  // else if (Kernel.load(id) != null) {
-  //   let kp = KernelPermission.load(role)
-  //   if (kp == null) {
-  //     kp = new KernelPermission(role)
-  //     kp.entities = new Array<string>()
-  //     kp.appAddress = id
-  //   }
-  //   if (event.params.allowed == true) {
-  //     let roleName = roleLookupTable.get(role) as string
-  //     kp.role = roleName
-  //     let entities = kp.entities
-  //     let i = entities.indexOf(entity)
-  //     if (i == -1) {
-  //       entities.push(entity)
-  //       kp.entities = entities
-  //       kp.save()
-  //     }
-  //   } else if (event.params.allowed == false) {
-  //     let entities = kp.entities
-  //     let i = entities.indexOf(entity)
-  //     entities.splice(i, 1)
-  //     kp.entities = entities
-  //     kp.save()
-  //   }
-  // }
+    /****** Update Permission ******/
+    const permissionId = event.params.app
+      .toHexString()
+      .concat('-')
+      .concat(event.params.role.toHexString())
+      .concat('-')
+      .concat(event.params.entity.toHexString())
+
+    // if no Permission yet create new one
+    let permission = Permission.load(permissionId)
+    if (permission == null) {
+      permission = new Permission(permissionId) as Permission
+      permission.app = app
+      permission.role = role
+      permission.entity = entity
+    }
+        
+    // update values
+    permission.allowed = allowed
+
+    const aclPermissions = acl.permissions || []
+    aclPermissions.push(permission.id)
+    acl.permissions = aclPermissions
+
+    permission.save()
+    acl.save()
+  }
 }
 
-export function handleChangePermissionManager(event: ChangePermissionManager): void {
-  const aclID = event.address.toHex()
-  const acl = ACL.load(aclID)
+export function handleChangePermissionManager(
+  event: ChangePermissionManager
+): void {
+  const app = event.params.app.toHex()
+  const roleName = event.params.role.toHexString()
+  const manager = event.params.manager
 
-  // // EVMScriptRegistry
-  // else if (EVMScriptRegistry.load(id) != null) {
-  //   let evmsr = EVMScriptRegistryManagers.load(id)
-  //   if (evmsr == null) {
-  //     evmsr = new EVMScriptRegistryManagers(id)
-  //   }
-  //   if (role == EVM_SCRIPT_REGISTRY_ADD_EXECUTOR_ROLE_HASH) {
-  //     evmsr.managesAddExecutor = manager
-  //     evmsr.save()
-  //   } else if (role == EVM_SCRIPT_REGISTRY_MANAGER_ROLE_HASH) {
-  //     evmsr.managesEnableAndDisableExecutors = manager
-  //     evmsr.save()
-  //   }
-  // }
+  /****** Update Role ******/
+  const roleId = event.params.app
+    .toHexString()
+    .concat('-')
+    .concat(event.params.role.toHexString())
 
-  // // ACL
-  // else if (ACL.load(id) != null) {
-  //   let am = ACLManagers.load(id)
-  //   if (am == null) {
-  //     am = new ACLManagers(id)
-  //   }
-  //   am.managesCreatePermissions = manager
-  //   am.save()
-  // }
+  // if no Role yet create new one
+  let role = Role.load(roleId)
+  if (role == null) {
+    role = new Role(roleId) as Role
+    role.role = roleName
+    role.app = app
+  }
 
-  // //Kernel
-  // else if (Kernel.load(id) != null) {
-  //   let km = KernelManagers.load(id)
-  //   if (km == null) {
-  //     km = new KernelManagers(id)
-  //   }
-  //   km.managesManageApps = manager
-  //   km.save()
-  // }
+  // update values
+  role.manager = manager
+
+  role.save()
 }
 
-export function handleSetPermissionParams(event: SetPermissionParams): void {
-
-}
+export function handleSetPermissionParams(event: SetPermissionParams): void {}
