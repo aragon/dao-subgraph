@@ -19,7 +19,6 @@
     "prepare:rinkeby": "mustache config/rinkeby.json subgraph.template.yaml > subgraph.yaml && mustache config/rinkeby.json src/helpers/ens.template.ts > src/helpers/ens.ts",
     "prepare:ropsten": "mustache config/ropsten.json subgraph.template.yaml > subgraph.yaml && mustache config/ropsten.json src/helpers/ens.template.ts > src/helpers/ens.ts",
     "prepare:staging": "mustache config/staging.json subgraph.template.yaml > subgraph.yaml && mustache config/staging.json src/helpers/ens.template.ts > src/helpers/ens.ts"
-
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.16.0",

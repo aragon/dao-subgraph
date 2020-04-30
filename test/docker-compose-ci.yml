@@ -1,0 +1,15 @@
+version: "3.4"
+services:
+  test:
+    build:
+      context: ../
+      dockerfile: test/Dockerfile
+    depends_on:
+      - graph
+      - ipfs
+      - ethereum
+    environment:
+      IPFS_NODE: http://ipfs:5001
+      GRAPH_NODE: http://graph:8020
+      GRAPHQL_SERVER: http://graph:8000
+      TESTNET_URL: http://ethereum:8545
