@@ -7,6 +7,7 @@ build/
 # Production
 types
 subgraph.yaml
+src/helpers/ens.ts
 
 # Code coverage artifacts
 /coverage
