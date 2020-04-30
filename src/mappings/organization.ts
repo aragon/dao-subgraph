@@ -83,13 +83,14 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
       const repo = resolveRepoAddress(event.params.appId)
 
       if (repo) {
-        // Fetch files from ipfs
-        const artifact = getAppMetadata(repo.toHex(), 'artifact.json')
-        const manifest = getAppMetadata(repo.toHex(), 'manifest.json')
-
         app.repo = repo.toHex()
-        app.artifact = artifact
-        app.manifest = manifest
+
+        // // Fetch files from ipfs
+        // const artifact = getAppMetadata(repo.toHex(), 'artifact.json')
+        // const manifest = getAppMetadata(repo.toHex(), 'manifest.json')
+
+        // app.artifact = artifact
+        // app.manifest = manifest
       }
     }
 

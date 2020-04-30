@@ -46,7 +46,7 @@ type Acl @entity {
 
 type Permission @entity {
   id: ID!                             # ID concat of app, role and entity
-  app: App!                           # App entity
+  app: App                            # App entity
   role: Role!                         # Role entity
   entity: Bytes!                      # Address assigned the permissions
   allowed: Boolean                    # Entity has permissions
@@ -61,8 +61,8 @@ type App @entity {
   isUpgradeable: Boolean!             # Whether the app is upgradeable
   implementation: Bytes               # Address of the app instance or base
   repo: Repo                          # Repo entity
-  artifact: String                    # Artifact.json metadata
-  manifest: String                    # Manifest.json metadata
+  # artifact: String                    # Artifact.json metadata
+  # manifest: String                    # Manifest.json metadata
   organization: Organization! @derivedFrom(field: "apps")
   roles: [Role!] @derivedFrom(field: "app")
 }
