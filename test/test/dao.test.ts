@@ -2,7 +2,7 @@ import "mocha";
 import path from "path";
 import { shell } from "../src/util/exec";
 import { deployDao } from "../src/deployDao";
-import { waitForUrl, waitForMs } from "../src/util/waitFor";
+import { waitForUrl, waitForMs, waitForTestnet } from "../src/util/waitFor";
 import { renderTemplate } from "../src/util/templates";
 import { request } from "graphql-request";
 import retry from "async-retry";
@@ -10,10 +10,10 @@ import retry from "async-retry";
 const subgraphDir = path.resolve("../");
 const subgraphPath = path.join(subgraphDir, "subgraph.yaml");
 const subgraphTemplatePath = path.join(subgraphDir, "subgraph.template.yaml");
-const graphNode = "http://localhost:8020";
-const graphServer = "http://localhost:8000";
-const ipfsNode = "http://localhost:5001";
-const testnetUrl = "http://localhost:8545";
+const graphNode = process.env.GRAPH_NODE || "http://localhost:8020";
+const graphServer = process.env.GRAPHQL_SERVER || "http://localhost:8000";
+const ipfsNode = process.env.IPFS_NODE || "http://localhost:5001";
+const testnetUrl = process.env.TESTNET_URL || "http://localhost:8545";
 
 interface SubgraphConfig {
   network: string; // "mainnet",
@@ -30,6 +30,10 @@ describe("Deploy a DAO factory and query a DAO", () => {
   // Give the subgraph a unique name
   const graphName = "dao-subgraph" + String(Math.random()).slice(2);
 
+  before("Wait for testnet to be live", async () => {
+    await waitForTestnet(testnetUrl);
+  });
+
   before("Should deploy a DAOFactory and DAO", async () => {
     const result = await deployDao(testnetUrl);
     daoAddress = result.dao;
@@ -38,6 +42,12 @@ describe("Deploy a DAO factory and query a DAO", () => {
       daoAddress,
       daoFactoryAddress,
     });
+  });
+
+  before("Wait for graphNode to be live", async () => {
+    // Wait for graphNode
+    await waitForUrl(graphNode);
+    await waitForMs(1000); // One extra second to ensure success
   });
 
   before("Should deploy the subgraph", async () => {
@@ -52,10 +62,6 @@ describe("Deploy a DAO factory and query a DAO", () => {
     };
 
     renderTemplate(subgraphTemplatePath, subgraphPath, config);
-
-    // Wait for graphNode
-    await waitForUrl(graphNode);
-    await waitForMs(1000); // One extra second to ensure success
 
     await shell(
       `node_modules/.bin/graph create ${graphName} --node ${graphNode}`,
