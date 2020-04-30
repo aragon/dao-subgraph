@@ -20,5 +20,6 @@ COPY . ./
 
 WORKDIR /usr/src/app/test
 RUN yarn
+RUN yarn generate
 
 CMD ["yarn", "test"]
