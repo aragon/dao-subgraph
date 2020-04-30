@@ -1,0 +1,22 @@
+diff --git a/node_modules/typechain-target-ethers/dist/index.js b/node_modules/typechain-target-ethers/dist/index.js
+index b9f3ef1..d768845 100644
+--- a/node_modules/typechain-target-ethers/dist/index.js
++++ b/node_modules/typechain-target-ethers/dist/index.js
+@@ -69,7 +69,7 @@ class Ethers extends ts_generator_1.TsGeneratorPlugin {
+     }
+     genContractFactoryFile(contract, abi, bytecode) {
+         return {
+-            path: path_1.join(this.outDirAbs, `${contract.name}Factory.ts`),
++            path: path_1.join(this.outDirAbs, `${contract.name}_Factory.ts`),
+             contents: generation_1.codegenContractFactory(contract, abi, bytecode),
+         };
+     }
+@@ -79,7 +79,7 @@ class Ethers extends ts_generator_1.TsGeneratorPlugin {
+         const abstractFactoryFiles = Object.keys(this.contractCache).map(contractName => {
+             const { contract, abi } = this.contractCache[contractName];
+             return {
+-                path: path_1.join(this.outDirAbs, `${contract.name}Factory.ts`),
++                path: path_1.join(this.outDirAbs, `${contract.name}_Factory.ts`),
+                 contents: generation_1.codegenAbstractContractFactory(contract, abi),
+             };
+         });
