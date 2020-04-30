@@ -69,7 +69,7 @@ export function handleChangePermissionManager(
   let role = RoleEntity.load(roleId)
   if (role == null) {
     role = new RoleEntity(roleId) as RoleEntity
-    role.role = roleName
+    role.name = roleName
     role.app = app
   }
 

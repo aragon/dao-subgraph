@@ -15,10 +15,10 @@ export function handleDeployDAO(event: DeployDAOEvent): void {
   // if no factory yet, set up empty
   if (factory == null) {
     factory = new FactoryEntity('1')
-    factory.organizationCount = 0
+    factory.orgCount = 0
     factory.organizations = []
   }
-  factory.organizationCount = factory.organizationCount + 1
+  factory.orgCount = factory.orgCount + 1
 
   // create new dao
   const org = new OrganizationEntity(event.params.dao.toHexString()) as OrganizationEntity

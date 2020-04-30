@@ -1,4 +1,4 @@
-import { ipfs, log } from '@graphprotocol/graph-ts'
+import { ipfs } from '@graphprotocol/graph-ts'
 
 import { Repo, Version } from '../types/schema'
 
@@ -10,10 +10,10 @@ export function getAppMetadata(
   const lastVersionId = repo.lastVersion
   const lastVersion = Version.load(lastVersionId)
 
-  const contentHash = lastVersion.content
+  const contentHash = lastVersion.content.split(':')[1]
 
   const filePath = `${contentHash}/${fileName}`
-  const file = ipfs.cat(filePath).toHexString()
+  const file = ipfs.cat(filePath).toString()
 
   return file
 }

@@ -42,39 +42,32 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
     // Check if app is forwarder
     let isForwarder : boolean
     const appForwarder = AppProxyForwarderContract.bind(event.params.proxy)
-    let callResult = appForwarder.try_isForwarder()
-    if (callResult.reverted) {
+    let callForwarderResult = appForwarder.try_isForwarder()
+    if (callForwarderResult.reverted) {
       isForwarder = false
     } else {
-      isForwarder = callResult.value
+      isForwarder = callForwarderResult.value
     }
 
     // Handle implementation
     let implementation : Address
     if (isUpgradeable) {
       const appUpgradeable = AppProxyUpgradeableContract.bind(event.params.proxy)
-      let callResult = appUpgradeable.try_implementation()
-      if (callResult.reverted) {
+      let callAppResult = appUpgradeable.try_implementation()
+      if (callAppResult.reverted) {
         log.info("appUpgradeable reverted", [])
       } else {
-        implementation = callResult.value
+        implementation = callAppResult.value
       }
     } else {
       const appPinned = AppProxyPinnedContract.bind(event.params.proxy)
-      let callResult = appPinned.try_implementation()
-      if (callResult.reverted) {
+      let callAppResult = appPinned.try_implementation()
+      if (callAppResult.reverted) {
         log.info("appPinned reverted", [])
       } else {
-        implementation = callResult.value
+        implementation = callAppResult.value
       }
     }
-
-    // // Use ens to resolve repo address
-    // const repo = resolveRepoAddress(event.params.appId).toHex()
-
-    // // Fetch files from ipfs
-    // const artifact = getAppMetadata(repo, 'artifact.json')
-    // const manifest = getAppMetadata(repo, 'manifest.json')
 
     // Create app
     let app = AppEntity.load(proxy)
@@ -84,10 +77,20 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
       app.appId = appId
       app.isForwarder = isForwarder
       app.isUpgradeable = isUpgradeable
-      // app.repo = repo
-      // app.artifact = artifact
-      // app.manifest = manifest
       app.implementation = implementation
+      
+      // Use ens to resolve repo address
+      const repo = resolveRepoAddress(event.params.appId)
+
+      if (repo) {
+        // Fetch files from ipfs
+        const artifact = getAppMetadata(repo.toHex(), 'artifact.json')
+        const manifest = getAppMetadata(repo.toHex(), 'manifest.json')
+
+        app.repo = repo.toHex()
+        app.artifact = artifact
+        app.manifest = manifest
+      }
     }
 
     const orgApps = org.apps || []

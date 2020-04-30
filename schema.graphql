@@ -11,7 +11,7 @@ type Repo @entity {
   node: Bytes!                        # Repo ENS node
   lastVersion: Version                # Latests version
   versions: [Version!] @derivedFrom(field: "repo")
-  # apps: [App!] @derivedFrom(field: "repo")
+  apps: [App!] @derivedFrom(field: "repo")
 }
 
 type Version @entity {
@@ -24,7 +24,7 @@ type Version @entity {
 
 type Factory @entity {
   id: ID!
-  organizationCount: Int!
+  orgCount: Int!
   organizations: [Organization!]
 }
 
@@ -60,9 +60,9 @@ type App @entity {
   isForwarder: Boolean!               # Whether the app is Forwarder
   isUpgradeable: Boolean!             # Whether the app is upgradeable
   implementation: Bytes               # Address of the app instance or base
-  # repo: Repo!                         # Repo entity
-  # artifact: String!                   # Artifact.json metadata
-  # manifest: String!                   # Manifest.json metadata
+  repo: Repo                          # Repo entity
+  artifact: String                    # Artifact.json metadata
+  manifest: String                    # Manifest.json metadata
   organization: Organization! @derivedFrom(field: "apps")
   roles: [Role!] @derivedFrom(field: "app")
 }
@@ -70,7 +70,7 @@ type App @entity {
 type Role @entity {
   id: ID!                             # ID concat of app and role hash
   app: App!                           # App entity
-  role: String!                       # Role name
+  name: String!                       # Role name
   manager: Bytes!                     # Manager address
   allowedEntities: [Permission!] @derivedFrom(field: "role")
 }
