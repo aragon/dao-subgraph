@@ -110,7 +110,7 @@ templates:
           handler: handleSetPermissionParams
         - event: ChangePermissionManager(indexed address,indexed bytes32,indexed address)
           handler: handleChangePermissionManager
-      file: ./src/mappings/acl.ts
+      file: ./src/mappings/ACL.ts
   - kind: ethereum/contract
     name: Repo
     network: {{network}}
@@ -129,4 +129,4 @@ templates:
       eventHandlers:
         - event: NewVersion(uint256,uint16[3])
           handler: handleNewVersion
-      file: ./src/mappings/repo.ts
+      file: ./src/mappings/Repo.ts
