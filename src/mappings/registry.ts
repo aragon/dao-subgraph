@@ -1,39 +1,43 @@
-// Import event types from the registrar contract ABI
-import { NewRepo as NewRepoEvent, NewAppProxy as NewAppProxyEvent } from '../types/Registry/APMRegistry'
-
 // Import entity types from the schema
 import { Registry as RegistryEntity, Repo as RepoEntity } from '../types/schema'
 
 // Import templates types
-import { Repo as RepoContract } from '../types/templates'
+import { Repo as RepoTemplate } from '../types/templates'
+// Import event types
+import { NewRepo as NewRepoEvent, NewAppProxy as NewAppProxyEvent } from '../types/templates/Registry/APMRegistry'
 
 export function handleNewRepo(event: NewRepoEvent): void {
-  let registry = RegistryEntity.load('1')
+  const registryId = event.address.toHex()
+  let registry = RegistryEntity.load(registryId)
 
-  // if no factory yet, set up empty
+  const repoId = event.params.repo.toHex()
+  const repoAddress = event.params.repo
+
+  // if no registry yet, set up empty
   if (registry == null) {
-    registry = new RegistryEntity('1')
+    registry = new RegistryEntity(registryId)
     registry.repoCount = 0
     registry.repos = []
   }
   registry.repoCount = registry.repoCount + 1
 
   // create new repo
-  const repo = new RepoEntity(event.params.repo.toHex()) as RepoEntity
-  repo.address = event.params.repo
+  const repo = new RepoEntity(repoId) as RepoEntity
+  repo.address = repoAddress
   repo.node = event.params.id
   repo.name = event.params.name
 
-  // add the dao for the derived relationship
+  // add the repo for the derived relationship
   const currentRepos = registry.repos
   currentRepos.push(repo.id)
   registry.repos = currentRepos
+
 
   // save to the store
   registry.save()
   repo.save()
 
-  RepoContract.create(event.params.repo)
+  RepoTemplate.create(repoAddress)
 }
 
 export function handleNewProxyApp(event: NewAppProxyEvent): void {}

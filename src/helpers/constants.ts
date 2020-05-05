@@ -12,11 +12,3 @@ export const KERNEL_APP_ADDR_NAMESPACE =
   '0xd6f028ca0e8edb4a8c9757ca4fdccab25fa1e0317da1188108f7d2dee14902fb'
 export const KERNEL_CORE_NAMESPACE =
   '0xc681a85306374a5ab27f0bbc385296a54bcd314a1948b6cf61c4ea1bc44bb9f8'
-
-/////////////////////////ACL CONSTANTS///////////////////////
-
-export const ACL_CREATE_PERMISSIONS_ROLE_HASH =
-  '0x0b719b33c83b8e5d300c521cb8b54ae9bd933996a14bef8c2f4e0285d2d2400a'
-
-export const KERNEL_APP_MANAGER_ROLE_HASH =
-  '0xb6d92708f3d4817afc106147d969e229ced5c46e65e0a5002a0d391287762bd0'

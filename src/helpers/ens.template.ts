@@ -6,9 +6,9 @@ import { PublicResolver } from '../types/templates/Organization/PublicResolver'
 
 const ENS_ADDRESS = '{{ens}}'
 
-export function resolveRepoAddress(
+export function resolveRepo(
   appId: Bytes
-): Address | null {
+): string | null {
   const ens = ENS.bind(Address.fromString(ENS_ADDRESS))
 
   let callEnsResult = ens.try_resolver(appId)
@@ -20,7 +20,7 @@ export function resolveRepoAddress(
     if (callResolverResult.reverted) {
       log.info("resolver reverted", [])
     } else {
-      return callResolverResult.value
+      return callResolverResult.value.toHex()
     }
   }
   return null

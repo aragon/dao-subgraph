@@ -1,10 +1,10 @@
 import { Address, Bytes, log } from '@graphprotocol/graph-ts'
 
-import { resolveRepoAddress } from '../helpers/ens'
+import { resolveRepo } from '../helpers/ens'
 import { getAppMetadata } from '../helpers/ipfs'
 
 // Import entity types from the schema
-import { Organization as OrganizationEntity, Acl as AclEntity, App as AppEntity } from '../types/schema'
+import { Organization as OrganizationEntity, Repo as RepoEntity, App as AppEntity } from '../types/schema'
 
 // Import templates types
 import {
@@ -30,67 +30,59 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
     const appId = event.params.appId.toHex()
     const isUpgradeable = event.params.isUpgradeable
 
-    // Create ACL
+    // Create ACL template
     if (appId == KERNEL_DEFAULT_ACL_APP_ID) {
-      const acl = new AclEntity(proxy) as AclEntity
-      acl.address = event.params.proxy
-      acl.save()
-      org.acl = proxy
+      org.acl = event.params.proxy
       AclTemplate.create(event.params.proxy)
-    }
-
-    // Check if app is forwarder
-    let isForwarder : boolean
-    const appForwarder = AppProxyForwarderContract.bind(event.params.proxy)
-    let callForwarderResult = appForwarder.try_isForwarder()
-    if (callForwarderResult.reverted) {
-      isForwarder = false
-    } else {
-      isForwarder = callForwarderResult.value
-    }
-
-    // Handle implementation
-    let implementation : Address
-    if (isUpgradeable) {
-      const appUpgradeable = AppProxyUpgradeableContract.bind(event.params.proxy)
-      let callAppResult = appUpgradeable.try_implementation()
-      if (callAppResult.reverted) {
-        log.info("appUpgradeable reverted", [])
-      } else {
-        implementation = callAppResult.value
-      }
-    } else {
-      const appPinned = AppProxyPinnedContract.bind(event.params.proxy)
-      let callAppResult = appPinned.try_implementation()
-      if (callAppResult.reverted) {
-        log.info("appPinned reverted", [])
-      } else {
-        implementation = callAppResult.value
-      }
     }
 
     // Create app
     let app = AppEntity.load(proxy)
     if (app == null) {
+      // Check if app is forwarder
+      let isForwarder : boolean
+      const appForwarder = AppProxyForwarderContract.bind(event.params.proxy)
+      let callForwarderResult = appForwarder.try_isForwarder()
+      if (callForwarderResult.reverted) {
+        isForwarder = false
+      } else {
+        isForwarder = callForwarderResult.value
+      }
+
+      // Handle implementation
+      let implementation : Address
+      if (isUpgradeable) {
+        const appUpgradeable = AppProxyUpgradeableContract.bind(event.params.proxy)
+        // let callAppResult = appUpgradeable.try_implementation()
+        // if (callAppResult.reverted) {
+        //   log.info("appUpgradeable reverted", [])
+        // } else {
+        //   implementation = callAppResult.value
+        // }
+        implementation = appUpgradeable.implementation()
+      } else {
+        const appPinned = AppProxyPinnedContract.bind(event.params.proxy)
+        // let callAppResult = appPinned.try_implementation()
+        // if (callAppResult.reverted) {
+        //   log.info("appPinned reverted", [])
+        // } else {
+        //   implementation = callAppResult.value
+        // }
+        implementation = appPinned.implementation()
+      }
+
       app = new AppEntity(proxy) as AppEntity
       app.address = event.params.proxy
       app.appId = appId
       app.isForwarder = isForwarder
       app.isUpgradeable = isUpgradeable
       app.implementation = implementation
-      
-      // Use ens to resolve repo address
-      const repo = resolveRepoAddress(event.params.appId)
-
-      if (repo) {
-        app.repo = repo.toHex()
-
-        // // Fetch files from ipfs
-        // const artifact = getAppMetadata(repo.toHex(), 'artifact.json')
-        // const manifest = getAppMetadata(repo.toHex(), 'manifest.json')
-
-        // app.artifact = artifact
-        // app.manifest = manifest
+      // Use ens to resolve repo
+      const repoId = resolveRepo(event.params.appId)
+      if (repoId) {
+        const repo = RepoEntity.load(repoId)
+        app.repoVersion = repo.lastVersion
+        app.artifact = getAppMetadata(repoId, 'artifact.json')
       }
     }
 
@@ -121,7 +113,14 @@ export function handleSetApp(event: SetAppEvent): void {
 
       const app = AppEntity.load(proxyAddress.toHex())
       app.implementation = event.params.app
-  
+      // Use ens to resolve repo
+      const repoId = resolveRepo(event.params.appId)
+      if (repoId) {
+        const repo = RepoEntity.load(repoId)
+        app.repoVersion = repo.lastVersion
+        app.artifact = getAppMetadata(repoId, 'artifact.json')
+      }
+
       app.save()
     }
   }

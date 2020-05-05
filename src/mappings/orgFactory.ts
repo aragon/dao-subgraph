@@ -1,8 +1,8 @@
 // Import event types from the contract ABI
-import { DeployDAO as DeployDAOEvent } from '../types/Factory/DAOFactory'
+import { DeployDAO as DeployDAOEvent } from '../types/DaoFactory/DAOFactory'
 
 // Import entity types from the schema
-import { Factory as FactoryEntity, Organization as OrganizationEntity } from '../types/schema'
+import { OrgFactory as FactoryEntity, Organization as OrganizationEntity } from '../types/schema'
 
 // Import templates types
 import { Organization as OrganizationTemplate } from '../types/templates'
@@ -10,19 +10,25 @@ import { Kernel as KernelContract } from '../types/templates/Organization/Kernel
 
 export function handleDeployDAO(event: DeployDAOEvent): void {
   let factory = FactoryEntity.load('1')
-  let kernel = KernelContract.bind(event.params.dao)
+  const factoryAddress = event.address
+
+  const orgId = event.params.dao.toHexString()
+  const orgAddress = event.params.dao
+
+  let kernel = KernelContract.bind(orgAddress)
 
   // if no factory yet, set up empty
   if (factory == null) {
     factory = new FactoryEntity('1')
+    factory.address = factoryAddress
     factory.orgCount = 0
     factory.organizations = []
   }
   factory.orgCount = factory.orgCount + 1
 
   // create new dao
-  const org = new OrganizationEntity(event.params.dao.toHexString()) as OrganizationEntity
-  org.address = event.params.dao
+  const org = new OrganizationEntity(orgId) as OrganizationEntity
+  org.address = orgAddress
   org.recoveryVault = kernel.getRecoveryVault()
 
   // add the dao for the derived relationship
@@ -34,5 +40,5 @@ export function handleDeployDAO(event: DeployDAOEvent): void {
   factory.save()
   org.save()
 
-  OrganizationTemplate.create(event.params.dao)
+  OrganizationTemplate.create(orgAddress)
 }
