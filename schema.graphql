@@ -1,17 +1,27 @@
+type RegistryFactory @entity {
+  id: ID!
+  address: Bytes!
+  registryCount: Int!
+  registries: [Registry!]
+}
+
 type Registry @entity {
   id: ID!
+  address: Bytes!
+  node: Bytes!                        # Registry ENS node
   repoCount: Int!
   repos: [Repo!]
+  factory: RegistryFactory! @derivedFrom(field: "registries")
 }
 
 type Repo @entity {
-  id: ID!                             # Repo ENS node
+  id: ID!                             # Repo ENS address
   address: Bytes!                     # Repo address
   name: String!                       # Repo name
   node: Bytes!                        # Repo ENS node
-  lastVersion: Version                # Latests version
+  lastVersion: Version                # Last Version
   versions: [Version!] @derivedFrom(field: "repo")
-  apps: [App!] @derivedFrom(field: "repo")
+  registry: Registry! @derivedFrom(field: "repos")
 }
 
 type Version @entity {
@@ -20,10 +30,12 @@ type Version @entity {
   contractAddress: Bytes!             # Smart contract address
   content: String!                    # Content URI
   repo: Repo!                         # Repo entity
+  apps: [App!] @derivedFrom(field: "repoVersion")
 }
 
-type Factory @entity {
+type OrgFactory @entity {
   id: ID!
+  address: Bytes!
   orgCount: Int!
   organizations: [Organization!]
 }
@@ -31,26 +43,11 @@ type Factory @entity {
 type Organization @entity {
   id: ID!                             # Kernel proxy address
   address: Bytes!                     # Kernel address
-  acl: Acl                            # Acl entity
+  acl: Bytes                          # Acl address
   recoveryVault: Bytes!               # Address of the recovery Vault instance
   apps: [App!]                        # List of apps
-  factory: Factory! @derivedFrom(field: "organizations")
-}
-
-type Acl @entity {
-  id: ID!                             # Acl proxy address
-  address: Bytes!                     # Acl address
   permissions: [Permission!]          # Permission object
-  organization: Organization! @derivedFrom(field: "acl")
-}
-
-type Permission @entity {
-  id: ID!                             # ID concat of app, role and entity
-  app: App                            # App entity
-  role: Role!                         # Role entity
-  entity: Bytes!                      # Address assigned the permissions
-  allowed: Boolean                    # Entity has permissions
-  # TODO: Add parms
+  factory: OrgFactory! @derivedFrom(field: "organizations")
 }
 
 type App @entity {
@@ -60,9 +57,8 @@ type App @entity {
   isForwarder: Boolean!               # Whether the app is Forwarder
   isUpgradeable: Boolean!             # Whether the app is upgradeable
   implementation: Bytes               # Address of the app instance or base
-  repo: Repo                          # Repo entity
-  # artifact: String                    # Artifact.json metadata
-  # manifest: String                    # Manifest.json metadata
+  repoVersion: Version                # Repo Version entity
+  artifact: String                    # Artifact.json metadata
   organization: Organization! @derivedFrom(field: "apps")
   roles: [Role!] @derivedFrom(field: "app")
 }
@@ -70,7 +66,15 @@ type App @entity {
 type Role @entity {
   id: ID!                             # ID concat of app and role hash
   app: App!                           # App entity
-  name: String!                       # Role name
+  hash: Bytes!                        # Role name hash
   manager: Bytes!                     # Manager address
   allowedEntities: [Permission!] @derivedFrom(field: "role")
+}
+
+type Permission @entity {
+  id: ID!                             # ID concat of app, role and entity
+  app: App                            # App entity
+  role: Role!                         # Role entity
+  entity: Bytes!                      # Address assigned the permissions
+  paramsHash: Bytes                   # Params hash
 }
