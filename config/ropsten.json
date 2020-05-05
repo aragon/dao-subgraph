@@ -1,9 +1,10 @@
 {
   "network": "ropsten",
   "ens": "0x6afe2cacee211ea9179992f89dc61ff25c61e923",
-  "daoFactory": "0x233c587095d066bafe44b543a719c93ff16423f3",
-  "factoryStartBlock": 6320898,
-  "daoFactory07": "0x3f2aa9dd22e97070518ba7988fe9b8724129d497",
-  "apmRegistry": "0x20610d303cc60526cef2ebedda30e90076828db9",
-  "registryStartBlock": 5968570
+  "orgFactory080": "0x233c587095d066bafe44b543a719c93ff16423f3",
+  "orgFactoryStartBlock080": 6320898,
+  "orgFactory070": "0x3f2aa9dd22e97070518ba7988fe9b8724129d497",
+  "orgFactoryStartBlock070": 5968539,
+  "apmRegistryFactory": "0xf5174528211211a667243edc8579f2042124895c",
+  "apmRegistryFactoryStartBlock": 5968565
 }

@@ -1,23 +1,22 @@
 specVersion: 0.0.2
-description: Aragon is a decentralized app (dApp) on the Ethereum blockchain that allows anyone to create and manage a decentralized organization. This subgraph explores the top level Aragon protocol data.
-repository: https://github.com/graphprotocol/aragon-subgraph/tree/master/aragon-network-subgraph
+description: Aragon organization subgraph.
+repository: https://github.com/aragon/dao-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    # TODO: Add data source for other factories
-    name: Factory
+    name: DaoFactory
     network: {{network}}
     source:
-      address: '{{daoFactory}}'
+      address: '{{orgFactory081}}'
       abi: DAOFactory
-      startBlock: {{factoryStartBlock}}
+      startBlock: {{orgFactoryStartBlock081}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.1
       language: wasm/assemblyscript
       entities:
-        - Factory
+        - OrgFactory
         - Organization
       abis:
         - name: DAOFactory
@@ -27,18 +26,106 @@ dataSources:
       eventHandlers:
         - event: DeployDAO(address)
           handler: handleDeployDAO
-      file: ./src/mappings/factory.ts
+      file: ./src/mappings/orgFactory.ts
   - kind: ethereum/contract
-    # TODO: Add data source for hatch and open Registries
+    name: DaoFactory08
+    network: {{network}}
+    source:
+      address: '{{orgFactory080}}'
+      abi: DAOFactory
+      startBlock: {{orgFactoryStartBlock080}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.1
+      language: wasm/assemblyscript
+      entities:
+        - OrgFactory
+        - Organization
+      abis:
+        - name: DAOFactory
+          file: ./abis/DAOFactory.json
+        - name: Kernel
+          file: ./abis/Kernel.json
+      eventHandlers:
+        - event: DeployDAO(address)
+          handler: handleDeployDAO
+      file: ./src/mappings/orgFactory.ts
+  - kind: ethereum/contract
+    name: DaoFactory070
+    network: {{network}}
+    source:
+      address: '{{orgFactory070}}'
+      abi: DAOFactory
+      startBlock: {{orgFactoryStartBlock070}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.1
+      language: wasm/assemblyscript
+      entities:
+        - OrgFactory
+        - Organization
+      abis:
+        - name: DAOFactory
+          file: ./abis/DAOFactory.json
+        - name: Kernel
+          file: ./abis/Kernel.json
+      eventHandlers:
+        - event: DeployDAO(address)
+          handler: handleDeployDAO
+      file: ./src/mappings/orgFactory.ts
+  - kind: ethereum/contract
+    name: DaoFactory060
+    network: {{network}}
+    source:
+      address: '{{orgFactory060}}'
+      abi: DAOFactory
+      startBlock: {{orgFactoryStartBlock060}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.1
+      language: wasm/assemblyscript
+      entities:
+        - OrgFactory
+        - Organization
+      abis:
+        - name: DAOFactory
+          file: ./abis/DAOFactory.json
+        - name: Kernel
+          file: ./abis/Kernel.json
+      eventHandlers:
+        - event: DeployDAO(address)
+          handler: handleDeployDAO
+      file: ./src/mappings/orgFactory.ts
+  - kind: ethereum/contract
+    name: RegistryFactory
+    network: {{network}}
+    source:
+      address: '{{apmRegistryFactory}}'
+      abi: APMRegistryFactory
+      startBlock: {{apmRegistryFactoryStartBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.1
+      language: wasm/assemblyscript
+      entities:
+        - RegistryFactory
+        - Registry
+      abis:
+        - name: APMRegistryFactory
+          file: ./abis/APMRegistryFactory.json
+      eventHandlers:
+        - event: DeployAPM(indexed bytes32,address)
+          handler: handleDeployAPM
+      file: ./src/mappings/registryFactory.ts
+templates:
+  - kind: ethereum/contract
     name: Registry
     network: {{network}}
     source:
-      address: '{{apmRegistry}}'
       abi: APMRegistry
-      startBlock: {{registryStartBlock}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.1
       language: wasm/assemblyscript
       entities:
         - Registry
@@ -52,7 +139,6 @@ dataSources:
         - event: NewAppProxy(address,bool,bytes32)
           handler: handleNewProxyApp
       file: ./src/mappings/registry.ts
-templates:
   - kind: ethereum/contract
     name: Organization
     network: {{network}}
@@ -64,7 +150,6 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Organization
-        - Acl
         - App
       abis:
         - name: Kernel
@@ -97,7 +182,7 @@ templates:
       apiVersion: 0.0.1
       language: wasm/assemblyscript
       entities:
-        - Acl
+        - Organization
         - Permission
         - Role
       abis:
