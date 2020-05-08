@@ -1,5 +1,5 @@
 {
-  "network": "staging",
+  "network": "rinkeby",
   "ens": "0xfe03625ea880a8cba336f9b5ad6e15b0a3b5a939",
   "orgFactory081": "0xf834966eb868ace8be9807a3d78ca410a1a4dc83",
   "orgFactoryStartBlock081": 5922830, 
