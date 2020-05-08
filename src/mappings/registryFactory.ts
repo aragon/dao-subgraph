@@ -2,7 +2,10 @@
 import { DeployAPM as DeployAPMEvent } from '../types/RegistryFactory/APMRegistryFactory'
 
 // Import entity types from the schema
-import { RegistryFactory as RegistryFactoryEntity, Registry as RegistryEntity } from '../types/schema'
+import {
+  RegistryFactory as RegistryFactoryEntity,
+  Registry as RegistryEntity,
+} from '../types/schema'
 
 // Import templates types
 import { Registry as RegistryTemplate } from '../types/templates'
@@ -32,7 +35,7 @@ export function handleDeployAPM(event: DeployAPMEvent): void {
   registry.repoCount = 0
   registry.repos = []
 
-  // add the dao for the derived relationship
+  // add the registry to the factory
   const currentRegistries = factory.registries
   currentRegistries.push(registry.id)
   factory.registries = currentRegistries

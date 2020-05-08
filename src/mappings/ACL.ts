@@ -1,7 +1,12 @@
-import { store } from '@graphprotocol/graph-ts'
+import { store, BigInt } from '@graphprotocol/graph-ts'
 
 // Import entity types from the schema
-import { Organization as OrganizationEntity, Permission as PermissionEntity, Role as RoleEntity } from '../types/schema'
+import {
+  Organization as OrganizationEntity,
+  Permission as PermissionEntity,
+  Role as RoleEntity,
+  Param as ParamEntity,
+} from '../types/schema'
 
 // Import event types from the templates contract ABI
 import {
@@ -17,65 +22,79 @@ export function handleSetPermission(event: SetPermissionEvent): void {
   const orgId = orgAddress.toHex()
   const org = OrganizationEntity.load(orgId)
 
-  if (org !== null) {
-    const allowed = event.params.allowed
+  const appAddress = event.params.app
+  const roleHash = event.params.role
+  const entityAddress = event.params.entity
 
-    /****** Update Permission ******/
-    const permissionId = event.params.app
-      .toHexString()
-      .concat('-')
-      .concat(event.params.role.toHexString())
-      .concat('-')
-      .concat(event.params.entity.toHexString())
+  const allowed = event.params.allowed
 
-    if (allowed) {
-      // if no Permission yet create new one
-      let permission = PermissionEntity.load(permissionId)
-      if (permission == null) {
-        const appId = event.params.app.toHex()
+  // Generate role id
+  const roleId = appAddress
+    .toHexString()
+    .concat('-')
+    .concat(roleHash.toHexString())
 
-        // Generate role id
-        const roleId = event.params.app
-          .toHexString()
-          .concat('-')
-          .concat(event.params.role.toHexString())
+  // If no Role yet create new one
+  let role = RoleEntity.load(roleId)
+  if (role == null) {
+    role = new RoleEntity(roleId) as RoleEntity
+    role.nameHash = roleHash
+    role.appAddress = appAddress
+    role.grantees = []
+  }
 
-        permission = new PermissionEntity(permissionId) as PermissionEntity
-        permission.app = appId
-        permission.role = roleId
-        permission.entity = event.params.entity
-      }
+  /****** Update Permission ******/
+  const permissionId = appAddress
+    .toHexString()
+    .concat('-')
+    .concat(roleHash.toHexString())
+    .concat('-')
+    .concat(entityAddress.toHexString())
 
-      const orgPermissions = org.permissions || []
-      orgPermissions.push(permission.id)
-      org.permissions = orgPermissions
-
-      permission.save()
-      org.save()
-    } else {
-      store.remove('Permission', permissionId)
+  if (allowed) {
+    // if no Permission yet create new one
+    let permission = PermissionEntity.load(permissionId)
+    if (permission == null) {
+      permission = new PermissionEntity(permissionId) as PermissionEntity
+      permission.appAddress = appAddress
+      permission.roleHash = roleHash
+      permission.entityAddress = event.params.entity
     }
+
+    // update org permissions
+    const orgPermissions = org.permissions || []
+    orgPermissions.push(permission.id)
+    org.permissions = orgPermissions
+
+    // update role grantees
+    const roleGrantees = role.grantees
+    roleGrantees.push(permission.id)
+    role.grantees = roleGrantees
+
+    permission.save()
+    role.save()
+    org.save()
+  } else {
+    store.remove('Permission', permissionId)
+    // TODO: Do we need to update the org and role entity?
   }
 }
 
 export function handleChangePermissionManager(
   event: ChangePermissionManagerEvent
 ): void {
+  const appAddress = event.params.app
   const roleHash = event.params.role
-  const appId = event.params.app.toHex()
 
-  /****** Update Role ******/
-  const roleId = event.params.app
+  // get role id and load from store
+  const roleId = appAddress
     .toHexString()
     .concat('-')
-    .concat(event.params.role.toHexString())
+    .concat(roleHash.toHexString())
 
-  // If no Role yet create new one
   let role = RoleEntity.load(roleId)
   if (role == null) {
     role = new RoleEntity(roleId) as RoleEntity
-    role.hash = roleHash
-    role.app = appId
   }
 
   // Update values
@@ -84,26 +103,70 @@ export function handleChangePermissionManager(
   role.save()
 }
 
-export function handleSetPermissionParams(event: SetPermissionParamsEvent): void {
+export function handleSetPermissionParams(
+  event: SetPermissionParamsEvent
+): void {
   const acl = AclContract.bind(event.address)
   const orgAddress = acl.kernel()
   const orgId = orgAddress.toHex()
   const org = OrganizationEntity.load(orgId)
 
-  if (org !== null) {
-    /****** Update Permission ******/
-    const permissionId = event.params.app
+  const appAddress = event.params.app
+  const roleHash = event.params.role
+  const entityAddress = event.params.entity
+
+  // get permission id and load from store
+  const permissionId = appAddress
+    .toHexString()
+    .concat('-')
+    .concat(roleHash.toHexString())
+    .concat('-')
+    .concat(entityAddress.toHexString())
+
+  let permission = PermissionEntity.load(permissionId)
+  if (permission == null) {
+    permission = new PermissionEntity(permissionId) as PermissionEntity
+  }
+
+  // get params length
+  const paramsLength = acl
+    .getPermissionParamsLength(entityAddress, appAddress, roleHash)
+    .toI32()
+
+  const paramHash = event.params.paramsHash
+
+  // iterate getting the params
+  for (let index = 0; index < paramsLength; index++) {
+    const paramData = acl.getPermissionParam(
+      entityAddress,
+      appAddress,
+      roleHash,
+      BigInt.fromI32(index)
+    )
+
+    // get param id and create new entity
+    const paramId = paramHash
       .toHexString()
       .concat('-')
-      .concat(event.params.role.toHexString())
-      .concat('-')
-      .concat(event.params.entity.toHexString())
+      .concat(index.toString())
 
-      // if no Permission yet create new one
-      const permission = PermissionEntity.load(permissionId)
-      permission.paramsHash = event.params.paramsHash
+    let param = ParamEntity.load(paramId)
+    if (param == null) {
+      param = new ParamEntity(paramId) as ParamEntity
+      param.argumentId = paramData.value0
+      param.operationType = paramData.value1
+      param.argumentValue = paramData.value2
+    }
 
-      permission.save()
-      org.save()
+    // update permission params
+    const permissionParams = permission.params
+    permissionParams.push(param.id)
+    permission.params = permissionParams
+
+    // save param to the store
+    param.save()
   }
+
+  permission.save()
+  org.save()
 }

@@ -2,7 +2,10 @@
 import { DeployDAO as DeployDAOEvent } from '../types/DaoFactory/DAOFactory'
 
 // Import entity types from the schema
-import { OrgFactory as FactoryEntity, Organization as OrganizationEntity } from '../types/schema'
+import {
+  OrgFactory as FactoryEntity,
+  Organization as OrganizationEntity,
+} from '../types/schema'
 
 // Import templates types
 import { Organization as OrganizationTemplate } from '../types/templates'
@@ -15,8 +18,6 @@ export function handleDeployDAO(event: DeployDAOEvent): void {
   const orgId = event.params.dao.toHexString()
   const orgAddress = event.params.dao
 
-  let kernel = KernelContract.bind(orgAddress)
-
   // if no factory yet, set up empty
   if (factory == null) {
     factory = new FactoryEntity('1')
@@ -26,12 +27,16 @@ export function handleDeployDAO(event: DeployDAOEvent): void {
   }
   factory.orgCount = factory.orgCount + 1
 
+  let kernel = KernelContract.bind(orgAddress)
+
   // create new dao
   const org = new OrganizationEntity(orgId) as OrganizationEntity
   org.address = orgAddress
   org.recoveryVault = kernel.getRecoveryVault()
+  org.acl = kernel.acl()
+  // TODO: Add system apps?
 
-  // add the dao for the derived relationship
+  // add the org to the factory
   const currentOrganizations = factory.organizations
   currentOrganizations.push(org.id)
   factory.organizations = currentOrganizations
