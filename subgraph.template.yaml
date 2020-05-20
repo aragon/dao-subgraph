@@ -4,105 +4,16 @@ repository: https://github.com/aragon/dao-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
+{{#orgDataSources}}
+  {{> orgDataSource.template.yaml}}
+{{/orgDataSources}}
   - kind: ethereum/contract
-    name: DaoFactory
+    name: {{registryFactoryName}}
     network: {{network}}
     source:
-      address: '{{orgFactory081}}'
-      abi: DAOFactory
-      startBlock: {{orgFactoryStartBlock081}}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.1
-      language: wasm/assemblyscript
-      entities:
-        - OrgFactory
-        - Organization
-      abis:
-        - name: DAOFactory
-          file: ./abis/DAOFactory.json
-        - name: Kernel
-          file: ./abis/Kernel.json
-      eventHandlers:
-        - event: DeployDAO(address)
-          handler: handleDeployDAO
-      file: ./src/mappings/orgFactory.ts
-  - kind: ethereum/contract
-    name: DaoFactory08
-    network: {{network}}
-    source:
-      address: '{{orgFactory080}}'
-      abi: DAOFactory
-      startBlock: {{orgFactoryStartBlock080}}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.1
-      language: wasm/assemblyscript
-      entities:
-        - OrgFactory
-        - Organization
-      abis:
-        - name: DAOFactory
-          file: ./abis/DAOFactory.json
-        - name: Kernel
-          file: ./abis/Kernel.json
-      eventHandlers:
-        - event: DeployDAO(address)
-          handler: handleDeployDAO
-      file: ./src/mappings/orgFactory.ts
-  - kind: ethereum/contract
-    name: DaoFactory070
-    network: {{network}}
-    source:
-      address: '{{orgFactory070}}'
-      abi: DAOFactory
-      startBlock: {{orgFactoryStartBlock070}}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.1
-      language: wasm/assemblyscript
-      entities:
-        - OrgFactory
-        - Organization
-      abis:
-        - name: DAOFactory
-          file: ./abis/DAOFactory.json
-        - name: Kernel
-          file: ./abis/Kernel.json
-      eventHandlers:
-        - event: DeployDAO(address)
-          handler: handleDeployDAO
-      file: ./src/mappings/orgFactory.ts
-  - kind: ethereum/contract
-    name: DaoFactory060
-    network: {{network}}
-    source:
-      address: '{{orgFactory060}}'
-      abi: DAOFactory
-      startBlock: {{orgFactoryStartBlock060}}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.1
-      language: wasm/assemblyscript
-      entities:
-        - OrgFactory
-        - Organization
-      abis:
-        - name: DAOFactory
-          file: ./abis/DAOFactory.json
-        - name: Kernel
-          file: ./abis/Kernel.json
-      eventHandlers:
-        - event: DeployDAO(address)
-          handler: handleDeployDAO
-      file: ./src/mappings/orgFactory.ts
-  - kind: ethereum/contract
-    name: RegistryFactory
-    network: {{network}}
-    source:
-      address: '{{apmRegistryFactory}}'
+      address: '{{registryFactoryAddress}}'
       abi: APMRegistryFactory
-      startBlock: {{apmRegistryFactoryStartBlock}}
+      startBlock: {{registryFactoryStartBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.1

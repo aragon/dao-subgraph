@@ -9,21 +9,20 @@
     "draw-schema": "./scripts/draw-schema.sh",
     "create:rpc": "graph create dao-subgraph --node http://127.0.0.1:8020",
     "deploy:rpc": "graph deploy dao-subgraph --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
-    "deploy:mainnet": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ 0xGabi/dao-subgraph --access-token 438d100657cb421e9324ebfdd3b36ec2",
-    "deploy:rinkeby": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ 0xGabi/dao-subgraph-rinkeby --access-token 438d100657cb421e9324ebfdd3b36ec2",
-    "deploy:ropste": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ 0xGabi/dao-subgraph-ropsten --access-token 438d100657cb421e9324ebfdd3b36ec2",
-    "deploy:staging": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/  --node https://api.thegraph.com/deploy/ 0xGabi/dao-subgraph-staging --access-token 438d100657cb421e9324ebfdd3b36ec2",
+    "deploy:mainnet": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ 0xGabi/dao-subgraph",
+    "deploy:rinkeby": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ 0xGabi/dao-subgraph-rinkeby",
+    "deploy:ropste": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ 0xGabi/dao-subgraph-ropsten",
+    "deploy:staging": "graph deploy --debug dao-subgraph --ipfs https://api.thegraph.com/ipfs/  --node https://api.thegraph.com/deploy/ 0xGabi/dao-subgraph-staging",
     "watch-local": "graph deploy dao-subgraph --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001",
-    "prepare:rpc": "mustache config/rpc.json subgraph.template.yaml > subgraph.yaml",
-    "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml && mustache config/mainnet.json src/helpers/ens.template.ts > src/helpers/ens.ts",
-    "prepare:rinkeby": "mustache config/rinkeby.json subgraph.template.yaml > subgraph.yaml && mustache config/rinkeby.json src/helpers/ens.template.ts > src/helpers/ens.ts",
-    "prepare:ropsten": "mustache config/ropsten.json subgraph.template.yaml > subgraph.yaml && mustache config/ropsten.json src/helpers/ens.template.ts > src/helpers/ens.ts",
-    "prepare:staging": "mustache config/staging.json subgraph.template.yaml > subgraph.yaml && mustache config/staging.json src/helpers/ens.template.ts > src/helpers/ens.ts"
-
+    "prepare:rpc": "mustache -p orgDataSource.template.yaml config/rpc.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:mainnet": "mustache -p orgDataSource.template.yaml config/mainnet.json subgraph.template.yaml > subgraph.yaml && mustache config/mainnet.json src/helpers/ens.template.ts > src/helpers/ens.ts",
+    "prepare:rinkeby": "mustache -p orgDataSource.template.yaml config/rinkeby.json subgraph.template.yaml > subgraph.yaml && mustache config/rinkeby.json src/helpers/ens.template.ts > src/helpers/ens.ts",
+    "prepare:ropsten": "mustache -p orgDataSource.template.yaml config/ropsten.json subgraph.template.yaml > subgraph.yaml && mustache config/ropsten.json src/helpers/ens.template.ts > src/helpers/ens.ts",
+    "prepare:staging": "mustache -p orgDataSource.template.yaml config/staging.json subgraph.template.yaml > subgraph.yaml && mustache config/staging.json src/helpers/ens.template.ts > src/helpers/ens.ts"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.16.0",
-    "@graphprotocol/graph-ts": "^0.16.0",
+    "@graphprotocol/graph-cli": "^0.18.0",
+    "@graphprotocol/graph-ts": "^0.18.1",
     "mustache": "^4.0.1"
   },
   "dependencies": {
