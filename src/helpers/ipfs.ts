@@ -1,30 +1,36 @@
-import { ipfs, log } from '@graphprotocol/graph-ts'
+import {ipfs, log} from '@graphprotocol/graph-ts'
 
-import { Version } from '../types/schema'
+// Import entity types from the schema
+import {IpfsHash as IpfsHashEntity} from '../types/schema'
 
 export function getAppMetadata(
-  repoVersionId: string,
-  fileName: string
-): string {
-  const version = Version.load(repoVersionId)
+  contentUri: string,
+  fileName: string,
+): string | null {
+  const contentLocation = contentUri.split(':')[0]
 
-  const contentLocation = version.contentUri.split(':')[0]
+  if (contentLocation == 'ipfs') {
+    const contentHash = contentUri.split(':')[1]
 
-  if (contentLocation === 'ipfs') {
-    const contentHash = version.contentUri.split(':')[1]
+    const ipfsPath = contentHash.concat('/').concat(fileName)
 
-    const filePath = `${contentHash}/${fileName}`
-    const file = ipfs.cat(filePath)
+    const rawData = ipfs.cat(ipfsPath)
 
-    if (file === null) {
-      log.warning('Content {} on {} was not resolved ', [
-        filePath,
-        repoVersionId,
-      ])
-      return ''
+    if (rawData === null) {
+      log.warning('Content {} of {} was not resolved ', [ipfsPath, contentUri])
+
+      // save hash to try to resolve later
+      let hash = IpfsHashEntity.load(contentHash)
+      if (hash == null) {
+        hash = new IpfsHashEntity(contentHash) as IpfsHashEntity
+      }
+      hash.hash = contentHash
+      hash.save()
+
+      return null
     }
 
-    return file.toString()
+    return rawData.toString()
   }
-  return ''
+  return null
 }

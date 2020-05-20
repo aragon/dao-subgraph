@@ -1,7 +1,6 @@
-import { Address, Bytes, log } from '@graphprotocol/graph-ts'
+import {Address, Bytes, log} from '@graphprotocol/graph-ts'
 
-import { resolveRepo } from '../helpers/ens'
-import { getAppMetadata } from '../helpers/ipfs'
+import {resolveRepo} from '../helpers/ens'
 
 // Import entity types from the schema
 import {
@@ -11,10 +10,10 @@ import {
 } from '../types/schema'
 
 // Import templates types
-import { Acl as AclTemplate } from '../types/templates'
-import { AppProxyForwarder as AppProxyForwarderContract } from '../types/templates/Organization/AppProxyForwarder'
-import { AppProxyPinned as AppProxyPinnedContract } from '../types/templates/Organization/AppProxyPinned'
-import { AppProxyUpgradeable as AppProxyUpgradeableContract } from '../types/templates/Organization/AppProxyUpgradeable'
+import {Acl as AclTemplate} from '../types/templates'
+import {AppProxyForwarder as AppProxyForwarderContract} from '../types/templates/Organization/AppProxyForwarder'
+import {AppProxyPinned as AppProxyPinnedContract} from '../types/templates/Organization/AppProxyPinned'
+import {AppProxyUpgradeable as AppProxyUpgradeableContract} from '../types/templates/Organization/AppProxyUpgradeable'
 import {
   Kernel as KernelContract,
   NewAppProxy as NewAppProxyEvent,
@@ -25,6 +24,7 @@ import {
   KERNEL_DEFAULT_ACL_APP_ID,
   KERNEL_APP_BASES_NAMESPACE,
   KERNEL_APP_ADDR_NAMESPACE,
+  KERNEL_CORE_NAMESPACE,
 } from '../helpers/constants'
 
 export function handleNewProxyApp(event: NewAppProxyEvent): void {
@@ -57,7 +57,7 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
     let implementation: Address
     if (isUpgradeable) {
       const appUpgradeable = AppProxyUpgradeableContract.bind(
-        event.params.proxy
+        event.params.proxy,
       )
       implementation = appUpgradeable.implementation()
     } else {
@@ -76,11 +76,10 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
     if (repoId) {
       const repo = RepoEntity.load(repoId)
       if (repo !== null) {
-        app.repoVersion = repo.lastVersion
+        app.version = repo.lastVersion
+        app.repo = repo.id
         app.repoName = repo.name
         app.repoAddress = repo.address
-        app.artifact = getAppMetadata(repo.lastVersion, 'artifact.json')
-        app.manifest = getAppMetadata(repo.lastVersion, 'manifest.json')
       }
     }
   }
@@ -94,13 +93,18 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
 }
 
 export function handleSetApp(event: SetAppEvent): void {
-  // Only care about changes if they're in the APP_BASE namespace
-  if (event.params.namespace.toHex() === KERNEL_APP_BASES_NAMESPACE) {
+  const namespace = event.params.namespace.toHex()
+  // Update if in the APP_BASE or CORE_BASE namespace
+  if (
+    namespace === KERNEL_APP_BASES_NAMESPACE ||
+    namespace === KERNEL_CORE_NAMESPACE
+  ) {
     let kernel = KernelContract.bind(event.address)
 
-    const namespace = Bytes.fromHexString(KERNEL_APP_ADDR_NAMESPACE) as Bytes
-
-    let callResult = kernel.try_getApp(namespace, event.params.appId)
+    let callResult = kernel.try_getApp(
+      Bytes.fromHexString(KERNEL_APP_ADDR_NAMESPACE) as Bytes,
+      event.params.appId,
+    )
     if (callResult.reverted) {
       log.info('kernel reverted', [])
     } else {
@@ -113,9 +117,7 @@ export function handleSetApp(event: SetAppEvent): void {
       if (repoId) {
         const repo = RepoEntity.load(repoId)
         if (repo !== null) {
-          app.repoVersion = repo.lastVersion
-          app.artifact = getAppMetadata(repo.lastVersion, 'artifact.json')
-          app.manifest = getAppMetadata(repo.lastVersion, 'manifest.json')
+          app.version = repo.lastVersion
         }
       }
 

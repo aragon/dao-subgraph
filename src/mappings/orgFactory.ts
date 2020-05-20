@@ -1,15 +1,20 @@
+import {Bytes} from '@graphprotocol/graph-ts'
+
 // Import event types from the contract ABI
-import { DeployDAO as DeployDAOEvent } from '../types/DaoFactory/DAOFactory'
+import {DeployDAO as DeployDAOEvent} from '../types/OrgFactory/DAOFactory'
 
 // Import entity types from the schema
 import {
   OrgFactory as FactoryEntity,
   Organization as OrganizationEntity,
+  App as AppEntity,
 } from '../types/schema'
 
 // Import templates types
-import { Organization as OrganizationTemplate } from '../types/templates'
-import { Kernel as KernelContract } from '../types/templates/Organization/Kernel'
+import {Organization as OrganizationTemplate} from '../types/templates'
+import {Kernel as KernelContract} from '../types/templates/Organization/Kernel'
+
+import {KERNEL_CORE_APP_ID, KERNEL_CORE_NAMESPACE} from '../helpers/constants'
 
 export function handleDeployDAO(event: DeployDAOEvent): void {
   let factory = FactoryEntity.load('1')
@@ -34,7 +39,21 @@ export function handleDeployDAO(event: DeployDAOEvent): void {
   org.address = orgAddress
   org.recoveryVault = kernel.getRecoveryVault()
   org.acl = kernel.acl()
-  // TODO: Add system apps?
+
+  // add kernel app entity
+  const app = new AppEntity(orgAddress.toHex()) as AppEntity
+  app.address = orgAddress
+  app.appId = KERNEL_CORE_APP_ID
+  app.implementation = kernel.getApp(
+    Bytes.fromHexString(KERNEL_CORE_NAMESPACE) as Bytes,
+    Bytes.fromHexString(KERNEL_CORE_APP_ID) as Bytes,
+  )
+
+  const orgApps = org.apps || []
+  orgApps.push(app.id)
+  org.apps = orgApps
+
+  app.save()
 
   // add the org to the factory
   const currentOrganizations = factory.organizations

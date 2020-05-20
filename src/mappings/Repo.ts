@@ -1,5 +1,7 @@
 // Import entity types from the schema
-import { Repo as RepoEntity, Version as VersionEntity } from '../types/schema'
+import {Repo as RepoEntity, Version as VersionEntity} from '../types/schema'
+
+import {getAppMetadata} from '../helpers/ipfs'
 
 // Import templates types
 import {
@@ -16,7 +18,7 @@ export function handleNewVersion(event: NewVersionEvent): void {
     const versionData = repoContract.getByVersionId(event.params.versionId)
 
     const codeAddress = versionData.value1
-    const contentUri = versionData.value2.toHexString()
+    const contentUri = versionData.value2.toString()
     const semanticVersion = event.params.semanticVersion.toString()
 
     const versionId = codeAddress
@@ -34,6 +36,8 @@ export function handleNewVersion(event: NewVersionEvent): void {
       version.repoName = repo.name
       version.repoAddress = repo.address
       version.repoNamehash = repo.node
+      version.artifact = getAppMetadata(contentUri, 'artifact.json')
+      version.manifest = getAppMetadata(contentUri, 'manifest.json')
     }
 
     repo.lastVersion = version.id
