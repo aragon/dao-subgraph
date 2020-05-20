@@ -1,4 +1,4 @@
-import { store, BigInt } from '@graphprotocol/graph-ts'
+import {BigInt} from '@graphprotocol/graph-ts'
 
 // Import entity types from the schema
 import {
@@ -72,16 +72,20 @@ export function handleSetPermission(event: SetPermissionEvent): void {
     role.grantees = roleGrantees
 
     permission.save()
-    role.save()
-    org.save()
   } else {
-    store.remove('Permission', permissionId)
-    // TODO: Do we need to update the org and role entity?
+    // update role grantees
+    const roleGrantees = role.grantees || []
+    const index = roleGrantees.indexOf(permissionId)
+    if (index > -1) {
+      roleGrantees.splice(index, 1)
+    }
   }
+  role.save()
+  org.save()
 }
 
 export function handleChangePermissionManager(
-  event: ChangePermissionManagerEvent
+  event: ChangePermissionManagerEvent,
 ): void {
   const appAddress = event.params.app
   const roleHash = event.params.role
@@ -104,7 +108,7 @@ export function handleChangePermissionManager(
 }
 
 export function handleSetPermissionParams(
-  event: SetPermissionParamsEvent
+  event: SetPermissionParamsEvent,
 ): void {
   const acl = AclContract.bind(event.address)
   const orgAddress = acl.kernel()
@@ -141,7 +145,7 @@ export function handleSetPermissionParams(
       entityAddress,
       appAddress,
       roleHash,
-      BigInt.fromI32(index)
+      BigInt.fromI32(index),
     )
 
     // get param id and create new entity

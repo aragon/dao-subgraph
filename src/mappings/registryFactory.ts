@@ -1,5 +1,5 @@
 // Import event types from the contract ABI
-import { DeployAPM as DeployAPMEvent } from '../types/RegistryFactory/APMRegistryFactory'
+import {DeployAPM as DeployAPMEvent} from '../types/ApmRegistryFactory/APMRegistryFactory'
 
 // Import entity types from the schema
 import {
@@ -8,7 +8,13 @@ import {
 } from '../types/schema'
 
 // Import templates types
-import { Registry as RegistryTemplate } from '../types/templates'
+import {Registry as RegistryTemplate} from '../types/templates'
+
+import {
+  APM_REGISTRY_NODE,
+  OPEN_REGISTRY_NODE,
+  HATCH_REGISTRY_NODE,
+} from '../helpers/constants'
 
 export function handleDeployAPM(event: DeployAPMEvent): void {
   let factory = RegistryFactoryEntity.load('1')
@@ -28,10 +34,21 @@ export function handleDeployAPM(event: DeployAPMEvent): void {
   }
   factory.registryCount = factory.registryCount + 1
 
+  // solve registry name
+  let name = ''
+  if (node.toHex() === APM_REGISTRY_NODE) {
+    name = 'aragonpm.eth'
+  } else if (node.toHex() === OPEN_REGISTRY_NODE) {
+    name = 'open.aragonpm.eth'
+  } else if (node.toHex() === HATCH_REGISTRY_NODE) {
+    name = 'hatch.aragonpm.eth'
+  }
+
   // create new registry
   const registry = new RegistryEntity(registryId) as RegistryEntity
   registry.address = registryAddress
   registry.node = node
+  registry.name = name
   registry.repoCount = 0
   registry.repos = []
 
