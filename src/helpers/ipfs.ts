@@ -12,25 +12,34 @@ export function getAppMetadata(
   if (contentLocation == 'ipfs') {
     const contentHash = contentUri.split(':')[1]
 
-    const ipfsPath = contentHash.concat('/').concat(fileName)
+    if (
+      contentHash != 'repo' &&
+      contentHash != 'enssub' &&
+      contentHash != 'apm'
+    ) {
+      const ipfsPath = contentHash.concat('/').concat(fileName)
 
-    const rawData = ipfs.cat(ipfsPath)
+      const rawData = ipfs.cat(ipfsPath)
 
-    if (rawData === null) {
-      log.warning('Content {} of {} was not resolved ', [ipfsPath, contentUri])
+      if (rawData === null) {
+        log.warning('Content {} of {} was not resolved ', [
+          ipfsPath,
+          contentUri,
+        ])
 
-      // save hash to try to resolve later
-      let hash = IpfsHashEntity.load(contentHash)
-      if (hash == null) {
-        hash = new IpfsHashEntity(contentHash) as IpfsHashEntity
+        // save hash to try to resolve later
+        let hash = IpfsHashEntity.load(contentHash)
+        if (hash == null) {
+          hash = new IpfsHashEntity(contentHash) as IpfsHashEntity
+        }
+        hash.hash = contentHash
+        hash.save()
+
+        return null
       }
-      hash.hash = contentHash
-      hash.save()
 
-      return null
+      return rawData.toString()
     }
-
-    return rawData.toString()
   }
   return null
 }

@@ -59,11 +59,11 @@ type App @entity {
   id: ID! # App proxy address
   address: Bytes! # App address
   appId: String! # ENS namehash of the aragonPM repo
-  isForwarder: Boolean! # Whether the app is Forwarder
-  isUpgradeable: Boolean! # Whether the app is upgradeable
+  isForwarder: Boolean # Whether the app is Forwarder
+  isUpgradeable: Boolean # Whether the app is upgradeable
   implementation: Bytes # Address of the app instance or base
   version: Version # Repo Version entity
-  repo: Repo! # Repo entity
+  repo: Repo # Repo entity
   repoName: String # Repo name
   repoAddress: Bytes # Repo address
   roles: [Role!] # List of roles

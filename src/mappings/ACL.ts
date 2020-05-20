@@ -99,6 +99,9 @@ export function handleChangePermissionManager(
   let role = RoleEntity.load(roleId)
   if (role == null) {
     role = new RoleEntity(roleId) as RoleEntity
+    role.nameHash = roleHash
+    role.appAddress = appAddress
+    role.grantees = []
   }
 
   // Update values
