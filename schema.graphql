@@ -61,13 +61,18 @@ type App @entity {
   appId: String! # ENS namehash of the aragonPM repo
   isForwarder: Boolean # Whether the app is Forwarder
   isUpgradeable: Boolean # Whether the app is upgradeable
-  implementation: Bytes # Address of the app instance or base
+  implementation: Implementation! # Implementation entity
   version: Version # Repo Version entity
   repo: Repo # Repo entity
   repoName: String # Repo name
   repoAddress: Bytes # Repo address
   roles: [Role!] # List of roles
   organization: Organization! @derivedFrom(field: "apps")
+}
+
+type Implementation @entity {
+  id: ID! # ID concat namespace and appId
+  address: Bytes! # App address
 }
 
 type Role @entity {

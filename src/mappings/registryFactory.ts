@@ -36,11 +36,11 @@ export function handleDeployAPM(event: DeployAPMEvent): void {
 
   // solve registry name
   let name = ''
-  if (node.toHex() === APM_REGISTRY_NODE) {
+  if (node.toHex() == APM_REGISTRY_NODE) {
     name = 'aragonpm.eth'
-  } else if (node.toHex() === OPEN_REGISTRY_NODE) {
+  } else if (node.toHex() == OPEN_REGISTRY_NODE) {
     name = 'open.aragonpm.eth'
-  } else if (node.toHex() === HATCH_REGISTRY_NODE) {
+  } else if (node.toHex() == HATCH_REGISTRY_NODE) {
     name = 'hatch.aragonpm.eth'
   }
 

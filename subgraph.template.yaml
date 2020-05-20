@@ -67,10 +67,6 @@ templates:
           file: ./abis/Kernel.json
         - name: ACL
           file: ./abis/ACL.json
-        - name: AppProxyPinned
-          file: ./abis/AppProxyPinned.json
-        - name: AppProxyUpgradeable
-          file: ./abis/AppProxyUpgradeable.json
         - name: AppProxyForwarder
           file: ./abis/IForwarder.json
         - name: ENS

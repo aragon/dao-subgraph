@@ -1,4 +1,4 @@
-import {Bytes} from '@graphprotocol/graph-ts'
+import {Bytes, Address} from '@graphprotocol/graph-ts'
 
 // Import event types from the contract ABI
 import {DeployDAO as DeployDAOEvent} from '../types/OrgFactory/DAOFactory'
@@ -8,6 +8,7 @@ import {
   OrgFactory as FactoryEntity,
   Organization as OrganizationEntity,
   App as AppEntity,
+  Implementation as ImplementationEntity,
 } from '../types/schema'
 
 // Import templates types
@@ -15,6 +16,38 @@ import {Organization as OrganizationTemplate} from '../types/templates'
 import {Kernel as KernelContract} from '../types/templates/Organization/Kernel'
 
 import {KERNEL_CORE_APP_ID, KERNEL_CORE_NAMESPACE} from '../helpers/constants'
+
+function addKernelApp(
+  kernelProxyAddress: Address,
+  kernel: KernelContract,
+  org: OrganizationEntity,
+): void {
+  // handle kernel implementation
+  const implementationId = KERNEL_CORE_NAMESPACE.concat('-').concat(
+    KERNEL_CORE_APP_ID,
+  )
+  const implementation = new ImplementationEntity(
+    implementationId,
+  ) as ImplementationEntity
+  implementation.address = kernel.getApp(
+    Bytes.fromHexString(KERNEL_CORE_NAMESPACE) as Bytes,
+    Bytes.fromHexString(KERNEL_CORE_APP_ID) as Bytes,
+  )
+
+  implementation.save()
+
+  // handle kernel implementation
+  const app = new AppEntity(kernelProxyAddress.toHex()) as AppEntity
+  app.address = kernelProxyAddress
+  app.appId = KERNEL_CORE_APP_ID
+  app.implementation = implementationId
+
+  const orgApps = org.apps || []
+  orgApps.push(app.id)
+  org.apps = orgApps
+
+  app.save()
+}
 
 export function handleDeployDAO(event: DeployDAOEvent): void {
   let factory = FactoryEntity.load('1')
@@ -40,20 +73,8 @@ export function handleDeployDAO(event: DeployDAOEvent): void {
   org.recoveryVault = kernel.getRecoveryVault()
   org.acl = kernel.acl()
 
-  // add kernel app entity
-  const app = new AppEntity(orgAddress.toHex()) as AppEntity
-  app.address = orgAddress
-  app.appId = KERNEL_CORE_APP_ID
-  app.implementation = kernel.getApp(
-    Bytes.fromHexString(KERNEL_CORE_NAMESPACE) as Bytes,
-    Bytes.fromHexString(KERNEL_CORE_APP_ID) as Bytes,
-  )
-
-  const orgApps = org.apps || []
-  orgApps.push(app.id)
-  org.apps = orgApps
-
-  app.save()
+  // add kernel app
+  addKernelApp(orgAddress, kernel, org)
 
   // add the org to the factory
   const currentOrganizations = factory.organizations

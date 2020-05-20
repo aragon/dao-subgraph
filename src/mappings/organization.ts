@@ -1,5 +1,3 @@
-import {Address, Bytes, log} from '@graphprotocol/graph-ts'
-
 import {resolveRepo} from '../helpers/ens'
 
 // Import entity types from the schema
@@ -7,15 +5,14 @@ import {
   Organization as OrganizationEntity,
   Repo as RepoEntity,
   App as AppEntity,
+  Implementation as ImplementationEntity,
 } from '../types/schema'
 
 // Import templates types
 import {Acl as AclTemplate} from '../types/templates'
 import {AppProxyForwarder as AppProxyForwarderContract} from '../types/templates/Organization/AppProxyForwarder'
-import {AppProxyPinned as AppProxyPinnedContract} from '../types/templates/Organization/AppProxyPinned'
-import {AppProxyUpgradeable as AppProxyUpgradeableContract} from '../types/templates/Organization/AppProxyUpgradeable'
+
 import {
-  Kernel as KernelContract,
   NewAppProxy as NewAppProxyEvent,
   SetApp as SetAppEvent,
 } from '../types/templates/Organization/Kernel'
@@ -23,7 +20,6 @@ import {
 import {
   KERNEL_DEFAULT_ACL_APP_ID,
   KERNEL_APP_BASES_NAMESPACE,
-  KERNEL_APP_ADDR_NAMESPACE,
   KERNEL_CORE_NAMESPACE,
 } from '../helpers/constants'
 
@@ -53,17 +49,8 @@ export function handleNewProxyApp(event: NewAppProxyEvent): void {
       isForwarder = callForwarderResult.value
     }
 
-    // Handle implementation
-    let implementation: Address
-    if (isUpgradeable) {
-      const appUpgradeable = AppProxyUpgradeableContract.bind(
-        event.params.proxy,
-      )
-      implementation = appUpgradeable.implementation()
-    } else {
-      const appPinned = AppProxyPinnedContract.bind(event.params.proxy)
-      implementation = appPinned.implementation()
-    }
+    // Generate implementation id
+    const implementation = KERNEL_APP_BASES_NAMESPACE.concat('-').concat(appId)
 
     app = new AppEntity(proxy) as AppEntity
     app.address = event.params.proxy
@@ -96,32 +83,23 @@ export function handleSetApp(event: SetAppEvent): void {
   const namespace = event.params.namespace.toHex()
   // Update if in the APP_BASE or CORE_BASE namespace
   if (
-    namespace === KERNEL_APP_BASES_NAMESPACE ||
-    namespace === KERNEL_CORE_NAMESPACE
+    namespace == KERNEL_APP_BASES_NAMESPACE ||
+    namespace == KERNEL_CORE_NAMESPACE
   ) {
-    let kernel = KernelContract.bind(event.address)
+    const appId = event.params.appId.toHex()
 
-    let callResult = kernel.try_getApp(
-      Bytes.fromHexString(KERNEL_APP_ADDR_NAMESPACE) as Bytes,
-      event.params.appId,
-    )
-    if (callResult.reverted) {
-      log.info('kernel reverted', [])
-    } else {
-      const proxyAddress = callResult.value
+    // Generate implementation id
+    const implementationId = namespace.concat('-').concat(appId)
 
-      const app = AppEntity.load(proxyAddress.toHex())
-      app.implementation = event.params.app
-      // Use ens to resolve repo
-      const repoId = resolveRepo(event.params.appId)
-      if (repoId) {
-        const repo = RepoEntity.load(repoId)
-        if (repo !== null) {
-          app.version = repo.lastVersion
-        }
-      }
-
-      app.save()
+    // Create implementation
+    let implementation = ImplementationEntity.load(implementationId)
+    if (implementation == null) {
+      implementation = new ImplementationEntity(
+        implementationId,
+      ) as ImplementationEntity
     }
+    implementation.address = event.params.app
+
+    implementation.save()
   }
 }
