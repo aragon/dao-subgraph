@@ -1,5 +1,5 @@
 // Import event types from the contract ABI
-import {DeployAPM as DeployAPMEvent} from '../types/ApmRegistryFactory/APMRegistryFactory'
+import { DeployAPM as DeployAPMEvent } from '../types/ApmRegistryFactory/APMRegistryFactory'
 
 // Import entity types from the schema
 import {
@@ -8,7 +8,7 @@ import {
 } from '../types/schema'
 
 // Import templates types
-import {Registry as RegistryTemplate} from '../types/templates'
+import { Registry as RegistryTemplate } from '../types/templates'
 
 import {
   APM_REGISTRY_NODE,
@@ -61,5 +61,8 @@ export function handleDeployAPM(event: DeployAPMEvent): void {
   factory.save()
   registry.save()
 
-  RegistryTemplate.create(registryAddress)
+  // Hack: to only use the main registry to tests
+  if (node.toHex() == APM_REGISTRY_NODE) {
+    RegistryTemplate.create(registryAddress)
+  }
 }

@@ -12,7 +12,7 @@ type Registry @entity {
   node: Bytes! # Registry ENS node
   repoCount: Int!
   repos: [Repo!]
-  factory: RegistryFactory! @derivedFrom(field: "registries")
+  #factory: RegistryFactory! @derivedFrom(field: "registries")
 }
 
 type Repo @entity {
@@ -87,7 +87,7 @@ type Permission @entity {
   id: ID! # ID concat of app, role and entity
   appAddress: Bytes! # App address
   roleHash: Bytes! # Role name hash
-  entityAddress: Bytes! # Address assigned the permissions
+  granteeAddres: Bytes! # Address assigned the permissions
   params: [Param!] # List of params
 }
 

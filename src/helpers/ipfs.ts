@@ -1,11 +1,11 @@
-import {ipfs, log} from '@graphprotocol/graph-ts'
+import { ipfs, log } from '@graphprotocol/graph-ts'
 
 // Import entity types from the schema
-import {IpfsHash as IpfsHashEntity} from '../types/schema'
+import { IpfsHash as IpfsHashEntity } from '../types/schema'
 
 export function getAppMetadata(
   contentUri: string,
-  fileName: string,
+  fileName: string
 ): string | null {
   const contentLocation = contentUri.split(':')[0]
 
@@ -41,5 +41,6 @@ export function getAppMetadata(
       return rawData.toString()
     }
   }
+
   return null
 }

@@ -1,7 +1,7 @@
 // Import entity types from the schema
-import {Repo as RepoEntity, Version as VersionEntity} from '../types/schema'
+import { Repo as RepoEntity, Version as VersionEntity } from '../types/schema'
 
-import {getAppMetadata} from '../helpers/ipfs'
+import { getAppMetadata } from '../helpers/ipfs'
 
 // Import templates types
 import {
@@ -36,8 +36,11 @@ export function handleNewVersion(event: NewVersionEvent): void {
       version.repoName = repo.name
       version.repoAddress = repo.address
       version.repoNamehash = repo.node
-      version.artifact = getAppMetadata(contentUri, 'artifact.json')
-      version.manifest = getAppMetadata(contentUri, 'manifest.json')
+      // Hack: only fetch from block onwards to reduce sync time
+      if (event.block.number.toString() >= '8490795') {
+        version.artifact = getAppMetadata(contentUri, 'artifact.json')
+        version.manifest = getAppMetadata(contentUri, 'manifest.json')
+      }
     }
 
     repo.lastVersion = version.id
